@@ -6,8 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/Scenes/UI/TitleScreen.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/UI/OptionsScreen.unity
+    guid: 0c47048b600118a46bad7928c7ce0bd8
+  - enabled: 1
+    path: Assets/Scenes/UI/SongSelectScene.unity
+    guid: e8c739f8bbc81904ca79c9fadff3e428
   m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: 59939878e8932cf49ad07d01fb56bb99, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
