@@ -1,13 +1,37 @@
 using UnityEngine;
+using System.Collections.Generic;
+
 
 public class RhythmGameManager : MonoBehaviour
 {
 
+    // Score System
+    public int score = 0;
+    public int current_combo = 0;
+    public int max_combo = 0;
+    public int perfect_count = 0;
+    public int great_count = 0;
+    public int miss_count = 0;
+    const int SCORE_PERFECT = 100;
+    const int SCORE_GREAT = 50;
+    const int PERFECT = 1;
+    const int GREAT = 2;
+    const int MISS = 0;
+    const float JUDGEMENT_PERFECT_WINDOW = 0.08f;
+    const float JUDGEMENT_GREAT_WINDOW = 0.32f;
+
     // Note Spawning System
-    int bpm = 60;
-    int fps = 120;
-    float time_current = 0.0f; 
+    public int bpm = 120;
+    float time_current = -3.0f; 
     float time_nextnote = 1.0f;
+
+    // Note Moving System
+    List<GameObject> ActiveNotes = new List<GameObject>();
+    public float note_speed = 9f;
+    public float note_height_origin = 22f;
+    float note_height_spawn = 6.0f;
+    float note_height_despawn = -6.0f;
+    public float note_prespawn_time;
 
     // Input state var - 0 (space) 1 2 (left) 3 4 (right)
     bool[] InputState = new bool[5];
@@ -21,19 +45,41 @@ public class RhythmGameManager : MonoBehaviour
 
 
     void HandleKeyDown(int keyId) {
-        // Handle Note Detection Thingies
-
+        
         // Update State
         InputState[keyId] = true;
 
-        Debug.Log("Key DOWN " + keyId);
+        // Find the closest note in lane
+        int keyLane = keyId;
+        GameObject hit_note = null;
+        float hit_note_distance = float.MaxValue;
+        foreach (GameObject note in ActiveNotes) {
+            int note_lane = note.GetComponent<RhythmNote>().lane;
+            float note_time = note.GetComponent<RhythmNote>().time;
+            bool note_triggered = note.GetComponent<RhythmNote>().triggered;
+            if (note_lane == keyLane && !note_triggered) {
+                float note_distance = Mathf.Abs(time_current - note_time);
+                if (note_distance < hit_note_distance) {
+                    hit_note = note;
+                    hit_note_distance = note_distance;
+                }
+            }
+        }
+
+        // check if the hit_note is valid
+        if (hit_note != null)
+        {
+            if (hit_note_distance <= JUDGEMENT_GREAT_WINDOW)
+            {
+                ScoreNote(hit_note, hit_note_distance);
+            }
+        }
     }
     void HandleKeyUp(int keyId) {
 
         // Update State
         InputState[keyId] = false;
 
-        Debug.Log("Key UP " + keyId);
     }
     void HandleInput() {
 
@@ -62,24 +108,110 @@ public class RhythmGameManager : MonoBehaviour
 
     }
 
-    void SpawnNote(int lane, int type) {
+    void ScoreNote(GameObject note, float accuracy) {
+        
+        note.GetComponent<RhythmNote>().Trigger();
 
-        Instantiate(NotePrefab, new Vector3(0.0f + (lane - 1.5f) * 1.0f, 0f, 0f), Quaternion.identity);
+        if (accuracy <= JUDGEMENT_PERFECT_WINDOW) {
+            current_combo += 1;
+            max_combo = Mathf.Max(max_combo, current_combo);
+            score += SCORE_PERFECT;
+            perfect_count += 1;
+            DestroyNote(note);
+        }
+        else if (accuracy <= JUDGEMENT_GREAT_WINDOW) {
+            current_combo += 1;
+            max_combo = Mathf.Max(max_combo, current_combo);
+            score += SCORE_GREAT;
+            great_count += 1;
+            DestroyNote(note);
+        }
+        else {
+            current_combo = 0;
+            miss_count += 1;
+        }
+        
+    }
 
+    void SpawnNote(int lane, float time) {
+
+        GameObject new_note = Instantiate(NotePrefab, new Vector3(0f,0f,0f), Quaternion.identity);
+        new_note.GetComponent<RhythmNote>().lane = lane;
+        new_note.GetComponent<RhythmNote>().time = time;
+        ActiveNotes.Add(new_note);
+
+    }
+    void DestroyNote(GameObject note) {
+        ActiveNotes.Remove(note);
+        Destroy(note);
+    }
+
+    Vector3 GetJudgementPosByLaneId(int lane) {
+        return new Vector3( (lane - 1.0f) * 2.8f - 4.2f, -3.0f, 0.0f);
     }
 
     void HandleNotes() {
 
+        // Setup
+        List<GameObject> ToRemoveNotes = new List<GameObject>();
+
         // Spawn Notes
         time_current += Time.deltaTime;
-        while (time_current >= time_nextnote) {
+        while (time_current >= (time_nextnote - note_prespawn_time) ) {
 
-            time_nextnote += 60f/bpm;
+            time_nextnote += 60.0f/bpm;
 
-            int note_lane = Random.Range(1, 5);
-            int note_type = 0;
-            SpawnNote(note_lane, note_type);
+            int note_lane = Random.Range(1, 7); // [1 - 5]
+
+
+            if (note_lane <= 4 && note_lane >= 1) {
+
+                SpawnNote(note_lane, time_nextnote);
+
+            } else if (note_lane == 5) {
+                int note_lane1 = Random.Range(1, 5);
+                int note_lane2 = Random.Range(1, 4);
+                note_lane2 = (note_lane1 + note_lane2) % 4 + 1;
+                
+                SpawnNote(note_lane1, time_nextnote);
+                SpawnNote(note_lane2, time_nextnote);
+
+            } else if (note_lane == 6) {
+                int note_lane1 = Random.Range(1, 5);
+                int note_lane2 = Random.Range(1, 5);
+                
+                SpawnNote(note_lane1, time_nextnote);
+                SpawnNote(note_lane2, time_nextnote + 30.0f/bpm);
+            }
         
+        }
+
+        //Update Notes
+        foreach (GameObject note in ActiveNotes) {
+
+            int note_lane = note.GetComponent<RhythmNote>().lane;
+            float note_time = note.GetComponent<RhythmNote>().time;
+            bool note_triggered = note.GetComponent<RhythmNote>().triggered;
+
+            Vector3 desired_pos = GetJudgementPosByLaneId(note_lane);
+            float t = time_current - note_time;
+            Vector3 note_direction = (desired_pos - new Vector3(0.0f, note_height_origin, 0.0f)).normalized;
+
+            note.transform.position = desired_pos + t * note_direction * note_speed;
+
+            //despawn notes
+            if (note_time + JUDGEMENT_GREAT_WINDOW < time_current) {
+                if (!note_triggered) ScoreNote(note, 100.0f);
+                if (note.transform.position.y < note_height_despawn) ToRemoveNotes.Add(note);
+            }
+
+        }
+
+        // Cleanup 
+        foreach (GameObject note in ToRemoveNotes) {
+
+            DestroyNote(note);
+
         }
 
     }
@@ -87,7 +219,7 @@ public class RhythmGameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        note_prespawn_time = (note_height_spawn - note_height_despawn) / note_speed;
     }
 
     // Update is called once per frame
