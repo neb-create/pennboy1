@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-
 public class RhythmGameManager : MonoBehaviour
 {
 
@@ -161,7 +160,7 @@ public class RhythmGameManager : MonoBehaviour
 
             time_nextnote += 60.0f/bpm;
 
-            int note_lane = Random.Range(1, 7); // [1 - 5]
+            int note_lane = UnityEngine.Random.Range(1, 7); // [1 - 5]
 
 
             if (note_lane <= 4 && note_lane >= 1) {
@@ -169,16 +168,16 @@ public class RhythmGameManager : MonoBehaviour
                 SpawnNote(note_lane, time_nextnote);
 
             } else if (note_lane == 5) {
-                int note_lane1 = Random.Range(1, 5);
-                int note_lane2 = Random.Range(1, 4);
+                int note_lane1 = UnityEngine.Random.Range(1, 5);
+                int note_lane2 = UnityEngine.Random.Range(1, 4);
                 note_lane2 = (note_lane1 + note_lane2) % 4 + 1;
                 
                 SpawnNote(note_lane1, time_nextnote);
                 SpawnNote(note_lane2, time_nextnote);
 
             } else if (note_lane == 6) {
-                int note_lane1 = Random.Range(1, 5);
-                int note_lane2 = Random.Range(1, 5);
+                int note_lane1 = UnityEngine.Random.Range(1, 5);
+                int note_lane2 = UnityEngine.Random.Range(1, 5);
                 
                 SpawnNote(note_lane1, time_nextnote);
                 SpawnNote(note_lane2, time_nextnote + 30.0f/bpm);
