@@ -165,5 +165,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc35c31e4f7784d1bb48b86219dea780, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  homing: 0
+  preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
+  homing: 1
+  delayBeforeLockOn: 0.5
+  homingRotateSpeedRads: 0.1
+  lockedOnSpeedMultiplier: 2
   damage: 5

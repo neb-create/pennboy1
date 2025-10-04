@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
 public class BulletEmitter : MonoBehaviour
@@ -8,8 +8,10 @@ public class BulletEmitter : MonoBehaviour
     {
         aoe, projectile
     }
-    [SerializeField] GameObject projectilePrefab; 
+    private BulletHellManager manager;
+    [SerializeField] BulletAttributePreset preset;
     [SerializeField] GameObject aoePrefab; //only projectileprefab or aoeprefab will be used
+    //TODO change aoe to take a preset asw
     [SerializeField] int numToEmitPerRound = 1;
     public int NumToEmitPerRound => numToEmitPerRound;
     [SerializeField] int numRounds = 5;
@@ -30,6 +32,7 @@ public class BulletEmitter : MonoBehaviour
     void Start()
     {
         elapsedTime = timeBetweenRounds; //ensure that guaranteed to emit when update runs for first time
+        manager = BulletHellManager.instance;
 
         if (useBPM) timeBetweenRounds = 60.0f / bpm;
     }
@@ -60,12 +63,11 @@ public class BulletEmitter : MonoBehaviour
 
             foreach (Vector2 v in vs)
             {
-                GameObject proj = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
-                proj.GetComponent<Projectile>().SetVelocity(v);
+                GameObject tmp = manager.masterProjectilePool.Get();
+                tmp.transform.position = transform.position;
+                tmp.GetComponent<Projectile>().InitAttributes();
+                tmp.GetComponent<Projectile>().SetVelocity(v);
             }
         }
     }
-
-    //TODO: write helper functions that generate a list of velocity vectors, give each vector to each particle
-
 }
