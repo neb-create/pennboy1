@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5912001459945588843}
   - component: {fileID: 2581722519365819289}
   m_Layer: 0
-  m_Name: RhythmNote
+  m_Name: NoteSpace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -77,12 +77,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 8308753942217178363, guid: 395c7c12b58360546b64266f1a673dcb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6a228fe72f2ba064d9773129da77d5a9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 23.603092, y: 16.4}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -100,3 +100,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd756390369698241b22f1ab3a34f202, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  time: 0
+  lane: 0
+  triggered: 0
