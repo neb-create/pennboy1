@@ -10,13 +10,13 @@ public class SlideNote : MonoBehaviour
     // time: the time frame where you should hit the note
     public float startTime;
     public float endTime;
-    public int maxDist;
+    public int maxDist = 2;
     public KeyCode startKey;
     public KeyCode endKey;
     public int numKeys;
     public List<(KeyCode, float)> progress;
-    const float PERFECT_THRESHOLD = 0.8; 
-    const float GREAT_THRESHOLD = 0.5; 
+    const float PERFECT_THRESHOLD = 0.8F;
+    const float GREAT_THRESHOLD = 0.5F;
 
     public float accuracy; // number of keys hit out of total, NOT timing related
 
@@ -70,35 +70,34 @@ public class SlideNote : MonoBehaviour
         [KeyCode.Period] = (3, 10),
         [KeyCode.Slash] = (3, 11)
     };
-}
 
 
-// returns a bool saying whether or not the input was added successfully, takes in the key and time of the input
-bool addInput(KeyCode hitKey, float time)
+    // returns a bool saying whether or not the input was added successfully, takes in the key and time of the input
+    bool addInput(KeyCode hitKey, float time)
     {
         (int, int) newKeyPos = keys[hitKey];
         (int newVertical, int newHorizontal) = newKeyPos;
 
-        if (progress.count == 0)
+        if (progress.Count == 0 && startKey == hitKey)
         {
             progress.Add((hitKey, time));
             return true;
         }
 
-        (KeyCode, float) prevInput = progress[progress.count-1];
+        (KeyCode, float) prevInput = progress[progress.Count - 1];
         (int prevVertical, int prevHorizontal) = keys[prevInput.Item1]; // finds the location of the previous key pressed
-        if (prevVertical != newVertical || maxDist < newHorizontal-prevHorizontal ) return false;
+        if (prevVertical != newVertical || maxDist > newHorizontal - prevHorizontal) return false;
 
         progress.Add((hitKey, time));
 
-        evaluateProgress(p);
+        evaluateProgress();
         return true;
     }
 
     // returns a bool saying whether or not the note is complete. Called after each key is added or at end time.
     bool evaluateProgress()
     {
-        float percentageDone = (0.0 + progress.count) / numKeys;
+        float percentageDone = (0.0F + progress.Count) / numKeys;
 
         if (percentageDone >= PERFECT_THRESHOLD) return true; // TODO: DISPLAY PERFECT AND HANDLE SCORING
         if (percentageDone >= GREAT_THRESHOLD) return true; // TODO: DISPLAY GREAT AND HANDLE SCORING
@@ -109,15 +108,25 @@ bool addInput(KeyCode hitKey, float time)
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        foreach (Dictionary<KeyCode, (int, int)> entry in keys)
+        List<KeyCode> allDown = new List<KeyCode>();
+        foreach (KeyValuePair<KeyCode, (int, int)> entry in keys)
         {
-
+            KeyCode code = entry.Key;
+            if (Input.GetKey(code))
+                allDown.Add(code);
         }
+
+        foreach (KeyCode c in allDown)
+        {
+            addInput(c, RhythmGameManager.instance.Time);
+        }
+
+
     }
 }
