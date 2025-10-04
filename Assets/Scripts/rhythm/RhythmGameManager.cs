@@ -41,7 +41,11 @@ public class RhythmGameManager : MonoBehaviour
     const int KEY_RIGHT_2 = 4;
 
     public GameObject NotePrefab;
+    public GameObject NotePrefabFull;
 
+
+    // Note Types
+    public enum NoteType { TAP, HOLD, SLIDE, FULL };
 
     void HandleKeyDown(int keyId) {
         
@@ -132,9 +136,21 @@ public class RhythmGameManager : MonoBehaviour
         
     }
 
-    void SpawnNote(int lane, float time) {
+    void SpawnNote(int lane, float time, NoteType type) {
 
-        GameObject new_note = Instantiate(NotePrefab, new Vector3(0f,0f,0f), Quaternion.identity);
+        GameObject NoteToSpawn;
+        switch (type)
+        {
+            case NoteType.FULL:
+                NoteToSpawn = NotePrefabFull;
+                lane = 0;
+                break;
+            default:
+                NoteToSpawn = NotePrefab;
+                break;
+        }
+        
+        GameObject new_note = Instantiate(NoteToSpawn, new Vector3(0f,0f,0f), Quaternion.identity);
         new_note.GetComponent<RhythmNote>().lane = lane;
         new_note.GetComponent<RhythmNote>().time = time;
         ActiveNotes.Add(new_note);
@@ -146,7 +162,10 @@ public class RhythmGameManager : MonoBehaviour
     }
 
     Vector3 GetJudgementPosByLaneId(int lane) {
-        return new Vector3( (lane - 1.0f) * 2.8f - 4.2f, -3.0f, 0.0f);
+
+        float x_pos = 0.0f;
+        if (lane >= 1 || lane <= 4) x_pos = (lane - 1.0f) * 2.8f - 4.2f;
+        return new Vector3(x_pos, -3.0f, 0.0f);
     }
 
     void HandleNotes() {
@@ -160,27 +179,29 @@ public class RhythmGameManager : MonoBehaviour
 
             time_nextnote += 60.0f/bpm;
 
-            int note_lane = UnityEngine.Random.Range(1, 7); // [1 - 5]
+            int note_lane = UnityEngine.Random.Range(1, 8); // [1 - 7]
 
 
             if (note_lane <= 4 && note_lane >= 1) {
 
-                SpawnNote(note_lane, time_nextnote);
+                SpawnNote(note_lane, time_nextnote, NoteType.TAP);
 
             } else if (note_lane == 5) {
                 int note_lane1 = UnityEngine.Random.Range(1, 5);
                 int note_lane2 = UnityEngine.Random.Range(1, 4);
                 note_lane2 = (note_lane1 + note_lane2) % 4 + 1;
                 
-                SpawnNote(note_lane1, time_nextnote);
-                SpawnNote(note_lane2, time_nextnote);
+                SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
+                SpawnNote(note_lane2, time_nextnote, NoteType.TAP);
 
             } else if (note_lane == 6) {
                 int note_lane1 = UnityEngine.Random.Range(1, 5);
                 int note_lane2 = UnityEngine.Random.Range(1, 5);
                 
-                SpawnNote(note_lane1, time_nextnote);
-                SpawnNote(note_lane2, time_nextnote + 30.0f/bpm);
+                SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
+                SpawnNote(note_lane2, time_nextnote + 30.0f/bpm, NoteType.TAP);
+            } else if (note_lane == 7) {
+                SpawnNote(0, time_nextnote, NoteType.FULL);
             }
         
         }
