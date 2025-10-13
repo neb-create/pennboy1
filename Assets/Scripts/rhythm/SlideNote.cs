@@ -124,7 +124,7 @@ public class SlideNote : MonoBehaviour
 
         foreach (KeyCode c in allDown)
         {
-            addInput(c, RhythmGameManager.instance.Time);
+            addInput(c, RhythmGameManager.instance.time_current);
         }
 
 

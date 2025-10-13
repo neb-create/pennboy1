@@ -21,7 +21,7 @@ public class RhythmGameManager : MonoBehaviour
 
     // Note Spawning System
     public int bpm = 120;
-    float time_current = -3.0f;
+    public float time_current = -3.0f;
     float time_nextnote = 1.0f;
 
     // Note Moving System

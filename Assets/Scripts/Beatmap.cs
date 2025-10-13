@@ -22,39 +22,41 @@ public class Beatmap
             float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60;
             time += float.Parse(tokens[1].Substring(minuteIndex + 1));
 
-            switch (tokens[0])
+            switch (int.Parse(tokens[0]))
             {
-                case BASIC_NOTE:
+                case NoteInfo.BASIC_NOTE:
                     int lane = int.Parse(tokens[2]);
-                    notes.Add(new NoteInfo(BASIC_NOTE, time, new string[]{lane}));
+                    notes.Add(new NoteInfo(NoteInfo.BASIC_NOTE, time, new string[]{lane + ""}));
                     break;
-                case HOLD_NOTE:
-                    int lane = int.Parse(tokens[2]);
-                    int length = float.Parse(tokens[3]);
-                    notes.Add(new NoteInfo(HOLD_NOTE, time, new string[] { lane, length }));
+                case NoteInfo.HOLD_NOTE:
+                    lane = int.Parse(tokens[2]);
+                    float length = float.Parse(tokens[3]);
+                    notes.Add(new NoteInfo(NoteInfo.HOLD_NOTE, time, new string[] { lane + "", length + ""}));
                     break;
-                case SPACE_NOTE:
-                    notes.Add(new NoteInfo(SPACE_NOTE, time));
+                case NoteInfo.SPACE_NOTE:
+                    notes.Add(new NoteInfo(NoteInfo.SPACE_NOTE, time));
                     break;
-                case SLIDE_NOTE:
+                case NoteInfo.SLIDE_NOTE:
                     float endtime = float.Parse(tokens[2]);
                     char start_key = tokens[3][0];
                     char end_key = tokens[4][0];
-                    notes.Add(new NoteInfo(SLIDE_NOTE, time, new string[] {endtime, start_key, end_key}));
+                    notes.Add(new NoteInfo(NoteInfo.SLIDE_NOTE, time, new string[] {endtime + "", start_key + "", end_key + ""}));
+                    break;
                 default:
                     Debug.Log("WARNING: Invalid Tile ID");
+                    break;
             }
         }
 
         return notes;
     }
 
-    public static class NoteInfo
+    public class NoteInfo
     {
-        public static int BASIC_NOTE = 0;
-        public static int HOLD_NOTE = 1;
-        public static int SPACE_NOTE = 2;
-        public static int SLIDE_NOTE = 3;
+        public const int BASIC_NOTE = 0;
+        public const int HOLD_NOTE = 1;
+        public const int SPACE_NOTE = 2;
+        public const  int SLIDE_NOTE = 3;
         public int note_type;
         public float start_time;
         public string[] extra_info;
