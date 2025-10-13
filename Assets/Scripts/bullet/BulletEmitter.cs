@@ -8,16 +8,16 @@ public class BulletEmitter : MonoBehaviour
     {
         aoe, projectile
     }
-    private BulletHellManager manager;
+    [Header("Emit Type")]
+    [SerializeField] EmitType type;
+
+    [Header("General (all of this is for bullet ngl except nunrounds)")]
     [SerializeField] BulletAttributePreset preset;
-    [SerializeField] GameObject aoePrefab; //only projectileprefab or aoeprefab will be used
-    //TODO change aoe to take a preset asw
+    //[SerializeField] GameObject aoePrefab; //you don't need a prefab for aoe bc it's hard coded
+    private BulletHellManager manager;
     [SerializeField] int numToEmitPerRound = 1;
     public int NumToEmitPerRound => numToEmitPerRound;
     [SerializeField] int numRounds = 5;
-
-    [Header("Emit Type")]
-    [SerializeField] EmitType type;
 
     [Header("Time Between Rounds")]
     [SerializeField] float timeBetweenRounds = 2f; //in seconds
@@ -54,9 +54,15 @@ public class BulletEmitter : MonoBehaviour
         roundsEmitted++;
         if (type == EmitType.aoe)
         {
-
+            //everything should already be set up in the gameobject with 
+            // area projectiles being in the correct positions childed to their emitter
+            AreaDamage[] areas = GetComponentsInChildren<AreaDamage>(true);
+            foreach (AreaDamage a in areas)
+            {
+                a.gameObject.SetActive(true);
+            }
         }
-        else if(type == EmitType.projectile)
+        else if (type == EmitType.projectile)
         {
             List<Vector2> vs = GetComponent<VelocityListGenerator>().GetVelocityList();
             //this list remains the same for the same bullet emitter
@@ -64,8 +70,8 @@ public class BulletEmitter : MonoBehaviour
             foreach (Vector2 v in vs)
             {
                 GameObject tmp = manager.masterProjectilePool.Get();
+                tmp.GetComponent<Projectile>().InitAttributes(preset);
                 tmp.transform.position = transform.position;
-                tmp.GetComponent<Projectile>().InitAttributes();
                 tmp.GetComponent<Projectile>().SetVelocity(v);
             }
         }

@@ -6,14 +6,14 @@ using UnityEngine.Scripting.APIUpdating;
 
 public class Projectile : MonoBehaviour
 {
-    [Header("Preset (USE THIS!! VARIABLES BELOW EXPOSED FOR DEBUGGING)")]
+    [Header("Preset (USE THIS!!")]
     [SerializeField] BulletAttributePreset preset;
     [Header("Homing Attributes")]
-    [SerializeField] bool homing;
+    private bool homing;
     private bool lockedOn = false;
-    [SerializeField] float delayBeforeLockOn = 0.5f;
-    [SerializeField] float homingRotateSpeedRads;
-    [SerializeField] float lockedOnSpeedMultiplier = 2f;
+    private float delayBeforeLockOn = 0.5f;
+    private float homingRotateSpeedRads;
+    private float lockedOnSpeedMultiplier = 2f;
     private float lockedOnSpeed;
     private Vector3 targetDir;
 
@@ -21,12 +21,12 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float damage;
     private Vector2 dir;
     private float speed;
-    private Rigidbody2D rb;
+    private Rigidbody rb;
     private Renderer rend;
     private float elapsedTime;
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody>();
         rend = GetComponent<Renderer>();
     }
    public void InitAttributes() //will be called by object pooling thing
@@ -37,8 +37,16 @@ public class Projectile : MonoBehaviour
             delayBeforeLockOn = preset.delayBeforeLockOn;
             homingRotateSpeedRads = preset.homingRotateSpeedRads;
             lockedOnSpeedMultiplier = preset.lockedOnSpeedMultiplier;
-            damage = preset.damage;
-            //TODO you may want a way to change the damage but keep everything else the same?
+        }
+    }
+    public void InitAttributes(BulletAttributePreset preset) //will be called by object pooling thing
+    {
+        if (preset != null)
+        {
+            homing = preset.homing;
+            delayBeforeLockOn = preset.delayBeforeLockOn;
+            homingRotateSpeedRads = preset.homingRotateSpeedRads;
+            lockedOnSpeedMultiplier = preset.lockedOnSpeedMultiplier;
         }
     }
     // Update is called once per frame
@@ -61,8 +69,6 @@ public class Projectile : MonoBehaviour
                 dir = (Vector2)newDir;
             }
         }
-
-        elapsedTime += Time.deltaTime;
     }
     void Update()
     {
@@ -70,12 +76,15 @@ public class Projectile : MonoBehaviour
         {
             BulletHellManager.instance.masterProjectilePool.Release(this.gameObject);
         }
+        elapsedTime += Time.deltaTime;
     }
 
-    void OnTriggerEnter2D(Collider2D collision)
+    void OnTriggerEnter(Collider collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {
+            PlayerController pc = collision.gameObject.GetComponent<PlayerController>();
+            if (pc.IsDashing()) return;
             Health h = collision.gameObject.GetComponent<Health>();
             h.TakeDamage(damage);
             PlayHitVFX();
