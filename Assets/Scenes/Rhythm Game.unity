@@ -155,10 +155,15 @@ MonoBehaviour:
   great_count: 0
   miss_count: 0
   bpm: 120
+  time_current: -3
   note_speed: 9
   note_height_origin: 22
   note_prespawn_time: 2
   NotePrefab: {fileID: 8451768978859604752, guid: 05da343d194f3aa43999362bacfdb337, type: 3}
+  NotePrefabFull: {fileID: 8451768978859604752, guid: dd5f667f1bc662e4b99dfa65f92c0416, type: 3}
+  hitVFXPrefab: {fileID: 7828873900810526531, guid: ee5803bb421304cc3b293ab237e15c04, type: 3}
+  travelVFXPrefab: {fileID: 3637245434513059628, guid: 8559467e6d88b4562b4f17cce95b54fd, type: 3}
+  slideVFXPrefab: {fileID: 3637245434513059628, guid: 554db2d52233e446f833fb7e69b8990f, type: 3}
 --- !u!4 &29439165
 Transform:
   m_ObjectHideFlags: 0
