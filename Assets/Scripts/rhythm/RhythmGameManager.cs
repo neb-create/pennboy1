@@ -21,7 +21,7 @@ public class RhythmGameManager : MonoBehaviour
 
     // Note Spawning System
     public int bpm = 120;
-    float time_current = -3.0f; 
+    float time_current = -3.0f;
     float time_nextnote = 1.0f;
 
     // Note Moving System
@@ -42,6 +42,14 @@ public class RhythmGameManager : MonoBehaviour
 
     public GameObject NotePrefab;
     public GameObject NotePrefabFull;
+
+    //VFX Prefabs
+    [Header("VFX Prefabs")]
+    public GameObject hitVFXPrefab;       
+    public GameObject travelVFXPrefab;   
+    public GameObject slideVFXPrefab;    
+
+    public static RhythmGameManager instance;
 
 
     // Note Types
@@ -120,6 +128,15 @@ public class RhythmGameManager : MonoBehaviour
             max_combo = Mathf.Max(max_combo, current_combo);
             score += SCORE_PERFECT;
             perfect_count += 1;
+
+            // =Spawn VFX on Hit
+            if (hitVFXPrefab != null)
+            {
+                Vector3 hitPos = note.transform.position;
+                GameObject vfx = Instantiate(hitVFXPrefab, hitPos, Quaternion.identity);
+                Destroy(vfx, 1f); // 
+            }
+
             DestroyNote(note);
         }
         else if (accuracy <= JUDGEMENT_GREAT_WINDOW) {
@@ -127,6 +144,15 @@ public class RhythmGameManager : MonoBehaviour
             max_combo = Mathf.Max(max_combo, current_combo);
             score += SCORE_GREAT;
             great_count += 1;
+
+            // =Spawn VFX on Hit
+            if (hitVFXPrefab != null)
+            {
+                Vector3 hitPos = note.transform.position;
+                GameObject vfx = Instantiate(hitVFXPrefab, hitPos, Quaternion.identity);
+                Destroy(vfx, 1f); // 
+            }
+
             DestroyNote(note);
         }
         else {
@@ -153,6 +179,13 @@ public class RhythmGameManager : MonoBehaviour
         GameObject new_note = Instantiate(NoteToSpawn, new Vector3(0f,0f,0f), Quaternion.identity);
         new_note.GetComponent<RhythmNote>().lane = lane;
         new_note.GetComponent<RhythmNote>().time = time;
+        
+        // Attach moving glow
+        if (travelVFXPrefab != null)
+        {
+            GameObject trail = Instantiate(travelVFXPrefab, new_note.transform.position, Quaternion.identity, new_note.transform);
+        }
+
         ActiveNotes.Add(new_note);
 
     }
@@ -239,6 +272,7 @@ public class RhythmGameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        instance = this;
         note_prespawn_time = (note_height_spawn - note_height_despawn) / note_speed;
     }
 
