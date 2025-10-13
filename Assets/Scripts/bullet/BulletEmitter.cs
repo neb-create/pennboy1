@@ -21,7 +21,7 @@ public class BulletEmitter : MonoBehaviour
 
     [Header("Time Between Rounds")]
     [SerializeField] float timeBetweenRounds = 2f; //in seconds
-    [SerializeField] bool useBPM;
+    [SerializeField] bool emitPerBeat;
     [SerializeField] int bpm;
     
     //private vars
@@ -34,7 +34,7 @@ public class BulletEmitter : MonoBehaviour
         elapsedTime = timeBetweenRounds; //ensure that guaranteed to emit when update runs for first time
         manager = BulletHellManager.instance;
 
-        if (useBPM) timeBetweenRounds = 60.0f / bpm;
+        if (emitPerBeat) timeBetweenRounds = 60.0f / bpm;
     }
 
     // Update is called once per frame
