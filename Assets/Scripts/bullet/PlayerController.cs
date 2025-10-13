@@ -2,20 +2,24 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private Rigidbody2D rb;
+    private Rigidbody rb;
     private Vector2 dir;
     [SerializeField] float speed = 5f;
 
     [Header("Dash Attributes")]
     [SerializeField] float dashSpeed = 30f;
-    [SerializeField] float iframeDuration = 0.2f; //in seconds
+    [SerializeField] float dashDuration = 0.2f; //in seconds
     [SerializeField] float dashCooldown = 1f;
     private float timeWhenDashStart;
     private bool isDashing = false;
+    public bool IsDashing()
+    {
+        return isDashing;
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody>();
         timeWhenDashStart = Time.time - 1f;
     }
 
@@ -32,7 +36,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            if (timeWhenDashStart + iframeDuration <= Time.time)
+            if (timeWhenDashStart + dashDuration <= Time.time)
             {
                 isDashing = false;
             }
