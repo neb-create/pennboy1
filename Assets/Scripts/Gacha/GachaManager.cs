@@ -1,11 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections; 
 using System.Collections.Generic;
 
 public class GachaManager : MonoBehaviour
 {
     [Header("UI References")]
-    public Button drawButton;
+    public Button draw1Button;
+
+    public Button draw10Button;
+
     public GameObject resultPanel;
     public Image characterImage;
     public Text characterName;
@@ -23,23 +27,52 @@ public class GachaManager : MonoBehaviour
     void Start()
     {
         resultPanel.SetActive(false);
-        drawButton.onClick.AddListener(DrawCharacter);
+        draw1Button.onClick.AddListener(() => DrawCharacter(1));
+        draw10Button.onClick.AddListener(() => DrawCharacter(10));
     }
 
-    void DrawCharacter()
+    IEnumerator DelayShow(CharacterData selected, float delay)
     {
+        yield return new WaitForSeconds(delay);
+        ShowResult(selected);
+    }
+
+    void DrawCharacter(int count)
+    {
+        Debug.Log($"Starting gacha: {count} pull(s)!");
         resultPanel.SetActive(false);
         flashEffect.Play();
 
-        Invoke(nameof(ShowResult), 1.2f);
+        if (count == 1)
+        {
+            CharacterData selected = GetRandomCharacter();
+            StartCoroutine(DelayShow(selected, 1.2f));
+            Debug.Log($"Character: {selected.characterName}({selected.rarity})");
+        }
+        else
+        {
+            Draw10();
+        };
+
     }
 
-    void ShowResult()
+    IEnumerator Draw10()
     {
-        CharacterData selected = GetRandomCharacter();
+        for (int i = 0; i < 10; i++)
+            {
+                CharacterData selected = GetRandomCharacter();
+                StartCoroutine(DelayShow(selected, 1.2f));
+                yield return new WaitForSeconds(0.6f);
+            }
+            Debug.Log("Pull x10 completed!");
+    }
+
+    void ShowResult(CharacterData selected)
+    {
         resultPanel.SetActive(true);
         characterImage.sprite = selected.characterImage;
         characterName.text = $"{selected.characterName}({selected.rarity})";
+        flashEffect.Play();
     }
 
     CharacterData GetRandomCharacter()
