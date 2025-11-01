@@ -1298,7 +1298,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Pull X2
+  m_text: 'Pull X10
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2000,7 +2002,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: Confirm
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2316,9 +2318,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b55098976cfe406092951ac3c6f0187, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drawButton: {fileID: 0}
-  resultPanel: {fileID: 0}
-  characterImage: {fileID: 0}
+  draw1Button: {fileID: 1436447340}
+  draw10Button: {fileID: 1161682542}
+  resultPanel: {fileID: 771641429}
+  characterImage: {fileID: 502941367}
   characterName: {fileID: 0}
   flashEffect: {fileID: 0}
   rRate: 0.75
