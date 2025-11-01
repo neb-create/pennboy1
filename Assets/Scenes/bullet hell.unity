@@ -154,13 +154,13 @@ MonoBehaviour:
   bulletPrefab: {fileID: 1650497433553459816, guid: 147a9e42a20f74fbbb83fb3630994462, type: 3}
   emitters:
   - emitter: {fileID: 2016906351}
-    beatToActivate: 6
+    beatToActivate: 5
   - emitter: {fileID: 1715987684}
-    beatToActivate: 12
+    beatToActivate: 10
   - emitter: {fileID: 800991687}
-    beatToActivate: 24
+    beatToActivate: 16
   - emitter: {fileID: 453264046}
-    beatToActivate: 36
+    beatToActivate: 21
 --- !u!4 &8512177
 Transform:
   m_ObjectHideFlags: 0
@@ -252,7 +252,7 @@ MonoBehaviour:
   numRounds: 5
   timeBetweenRounds: 3
   emitPerBeat: 0
-  bpm: 60
+  bpm: 174
 --- !u!212 &453264050
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -377,7 +377,7 @@ MonoBehaviour:
   numRounds: 5
   timeBetweenRounds: 3
   emitPerBeat: 1
-  bpm: 60
+  bpm: 174
 --- !u!212 &800991691
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1087,7 +1087,7 @@ MonoBehaviour:
   numRounds: 5
   timeBetweenRounds: 3
   emitPerBeat: 1
-  bpm: 60
+  bpm: 174
 --- !u!212 &1715987688
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1323,7 +1323,7 @@ MonoBehaviour:
   numRounds: 5
   timeBetweenRounds: 3
   emitPerBeat: 0
-  bpm: 60
+  bpm: 174
 --- !u!114 &2016906355
 MonoBehaviour:
   m_ObjectHideFlags: 0
