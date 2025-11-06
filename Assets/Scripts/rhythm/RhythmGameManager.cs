@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using static Beatmap;
 
 public class RhythmGameManager : MonoBehaviour
 {
@@ -54,6 +55,11 @@ public class RhythmGameManager : MonoBehaviour
 
     // Note Types
     public enum NoteType { TAP, HOLD, SLIDE, FULL };
+
+    // Spawning Notes
+    private int currNote;
+    private List<NoteInfo> noteInfos;
+    private bool randomSpawnMode;
 
     void HandleKeyDown(int keyId) {
         
@@ -206,37 +212,92 @@ public class RhythmGameManager : MonoBehaviour
         // Setup
         List<GameObject> ToRemoveNotes = new List<GameObject>();
 
+        if (currNote == noteInfos.Count)
+        {
+            Debug.Log("Finished Song");
+            currNote++;
+        }
+
         // Spawn Notes
         time_current += Time.deltaTime;
+
         while (time_current >= (time_nextnote - note_prespawn_time) ) {
+            if (randomSpawnMode) {
+                time_nextnote += 60.0f/bpm;
 
-            time_nextnote += 60.0f/bpm;
-
-            int note_lane = UnityEngine.Random.Range(1, 6); // [1 - 6]
+                int note_lane = UnityEngine.Random.Range(1, 6); // [1 - 6]
 
 
-            if (note_lane <= 4 && note_lane >= 1) {
+                if (note_lane <= 4 && note_lane >= 1) {
 
-                SpawnNote(note_lane, time_nextnote, NoteType.TAP);
+                    SpawnNote(note_lane, time_nextnote, NoteType.TAP);
 
-            } else if (note_lane == 5) {
-                int note_lane1 = UnityEngine.Random.Range(1, 5);
-                int note_lane2 = UnityEngine.Random.Range(1, 4);
-                note_lane2 = (note_lane1 + note_lane2) % 4 + 1;
-                
-                SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
-                SpawnNote(note_lane2, time_nextnote, NoteType.TAP);
+                } else if (note_lane == 5) {
+                    int note_lane1 = UnityEngine.Random.Range(1, 5);
+                    int note_lane2 = UnityEngine.Random.Range(1, 4);
+                    note_lane2 = (note_lane1 + note_lane2) % 4 + 1;
+                    
+                    SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
+                    SpawnNote(note_lane2, time_nextnote, NoteType.TAP);
 
-            } else if (note_lane == 6) {
-                int note_lane1 = UnityEngine.Random.Range(1, 5);
-                int note_lane2 = UnityEngine.Random.Range(1, 5);
-                
-                SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
-                SpawnNote(note_lane2, time_nextnote + 30.0f/bpm, NoteType.TAP);
-            } else if (note_lane == 7) {
-                SpawnNote(0, time_nextnote, NoteType.FULL);
+                } else if (note_lane == 6) {
+                    int note_lane1 = UnityEngine.Random.Range(1, 5);
+                    int note_lane2 = UnityEngine.Random.Range(1, 5);
+                    
+                    SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
+                    SpawnNote(note_lane2, time_nextnote + 30.0f/bpm, NoteType.TAP);
+                } else if (note_lane == 7) {
+                    SpawnNote(0, time_nextnote, NoteType.FULL);
+                }
+            } else {
+                while (currNote < noteInfos.Count && time_current >= (noteInfos[currNote].start_time - note_prespawn_time)) {
+                    Debug.Log(noteInfos[currNote].start_time + " " + note_prespawn_time + " " + time_current);
+                    switch (noteInfos[currNote].note_type)
+                    {
+                        case Beatmap.NoteInfo.BASIC_NOTE:
+                            SpawnNote(int.Parse(noteInfos[currNote].extra_info[0]), noteInfos[currNote].start_time, NoteType.TAP);
+                            break;
+                        case Beatmap.NoteInfo.HOLD_NOTE:
+                            Debug.Log("HOLD_NOTE_SPAWNED");
+                            break;
+                        case Beatmap.NoteInfo.SPACE_NOTE:
+                            SpawnNote(0, noteInfos[currNote].start_time, NoteType.FULL);
+                            break;
+                        case Beatmap.NoteInfo.SLIDE_NOTE:
+                            Debug.Log("SLIDE_NOTE_SPAWNED");
+                            break;
+                    }
+                    currNote++;
+                }
             }
-        
+
+            //time_nextnote += 60.0f/bpm;
+
+            //int note_lane = UnityEngine.Random.Range(1, 8); // [1 - 7]
+
+
+            //if (note_lane <= 4 && note_lane >= 1) {
+
+            //    SpawnNote(note_lane, time_nextnote, NoteType.TAP);
+
+            //} else if (note_lane == 5) {
+            //    int note_lane1 = UnityEngine.Random.Range(1, 5);
+            //    int note_lane2 = UnityEngine.Random.Range(1, 4);
+            //    note_lane2 = (note_lane1 + note_lane2) % 4 + 1;
+
+            //    SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
+            //    SpawnNote(note_lane2, time_nextnote, NoteType.TAP);
+
+            //} else if (note_lane == 6) {
+            //    int note_lane1 = UnityEngine.Random.Range(1, 5);
+            //    int note_lane2 = UnityEngine.Random.Range(1, 5);
+
+            //    SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
+            //    SpawnNote(note_lane2, time_nextnote + 30.0f/bpm, NoteType.TAP);
+            //} else if (note_lane == 7) {
+            //    SpawnNote(0, time_nextnote, NoteType.FULL);
+            //}
+
         }
 
         //Update Notes
@@ -273,7 +334,10 @@ public class RhythmGameManager : MonoBehaviour
     void Start()
     {
         instance = this;
+        noteInfos = Beatmap.LoadBeatmap("Beatmap");
+        currNote = 0;
         note_prespawn_time = (note_height_spawn - note_height_despawn) / note_speed;
+        randomSpawnMode = false;
     }
 
     // Update is called once per frame

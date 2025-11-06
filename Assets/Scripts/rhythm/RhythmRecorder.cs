@@ -38,7 +38,7 @@ public class RhythmRecorder : MonoBehaviour
                 curr_time = 0f;
                 Debug.Log("Song Started");
                 GetComponent<AudioSource>().Play();
-                SONG_LENGTH = GetComponent<AudioSource>().clip.length;
+                SONG_LENGTH = GetComponent<AudioSource>().clip.length / 8;
             }
             return;
         };
@@ -50,6 +50,10 @@ public class RhythmRecorder : MonoBehaviour
             Write();
             finished = true;
             Debug.Log("Song Done");
+            if (GetComponent<AudioSource>().isPlaying)
+            {
+                GetComponent<AudioSource>().Stop();
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.W))
@@ -94,7 +98,7 @@ public class RhythmRecorder : MonoBehaviour
     string FormatTime(float time)
     {
         int min = (int)(time / 60);
-        int sec = 1;
+        int sec = (int) (time-(min*60));
         int ms = (int) ((time - (int)time) * 100);
         return min + ":" + sec + "." + ms;
     }

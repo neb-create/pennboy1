@@ -5,7 +5,7 @@ public class Beatmap
 {
     // <note_id> <min:sec.ms> <note specific inputs>
     // 0 <min:sec.ms> <lane (1-4)>
-    // 1 <min:sec.ms> <lane (1-4)> <length seconds>
+    // 1 <min:sec.ms> <lane (1-4)> <length min:sec.ms>
     // 2 <min:sec.ms>
     // 3 <min:sec.ms> <endtime seconds> <start_key> <end_key>
     public static List<NoteInfo> LoadBeatmap(string filename)
@@ -17,7 +17,12 @@ public class Beatmap
 
         foreach (string line in mapLines)
         {
-            string[] tokens = line.Split("\t");
+            if (line.Length == 0)
+            {
+                continue;
+            }
+            Debug.Log(line);
+            string[] tokens = line.Split(" ");
             int minuteIndex = tokens[1].IndexOf(":");
             float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60;
             time += float.Parse(tokens[1].Substring(minuteIndex + 1));
@@ -30,8 +35,8 @@ public class Beatmap
                     break;
                 case NoteInfo.HOLD_NOTE:
                     lane = int.Parse(tokens[2]);
-                    float length = float.Parse(tokens[3]);
-                    notes.Add(new NoteInfo(NoteInfo.HOLD_NOTE, time, new string[] { lane + "", length + ""}));
+                    string length = tokens[3];
+                    notes.Add(new NoteInfo(NoteInfo.HOLD_NOTE, time, new string[] { lane + "", length}));
                     break;
                 case NoteInfo.SPACE_NOTE:
                     notes.Add(new NoteInfo(NoteInfo.SPACE_NOTE, time));
