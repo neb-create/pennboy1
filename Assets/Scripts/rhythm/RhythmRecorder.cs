@@ -17,6 +17,7 @@ public class RhythmRecorder : MonoBehaviour
     const int O = 3;
     const int SPACE = 4;
     const float MAX_BASIC_DELTA = 0.4f;
+    const float RECORD_PERCENT = 1.0f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -24,6 +25,7 @@ public class RhythmRecorder : MonoBehaviour
         startTimes = new float[4];
         data = "";
         Write();
+        GetComponent<AudioSource>().Stop();
     }
 
     // Update is called once per frame
@@ -38,14 +40,14 @@ public class RhythmRecorder : MonoBehaviour
                 curr_time = 0f;
                 Debug.Log("Song Started");
                 GetComponent<AudioSource>().Play();
-                SONG_LENGTH = GetComponent<AudioSource>().clip.length / 8;
+                SONG_LENGTH = GetComponent<AudioSource>().clip.length * RECORD_PERCENT;
             }
             return;
         };
 
         curr_time += Time.deltaTime;
 
-        if (curr_time > SONG_LENGTH)
+        if (Input.GetKeyDown(KeyCode.Backspace) || curr_time > SONG_LENGTH)
         {
             Write();
             finished = true;

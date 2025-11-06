@@ -17,7 +17,7 @@ public class Beatmap
 
         foreach (string line in mapLines)
         {
-            if (line.Length == 0)
+            if (line.Length <= 1)
             {
                 continue;
             }

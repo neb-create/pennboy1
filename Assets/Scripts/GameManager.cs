@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
     float note_z_despawn = -6.0f;
     float note_prespawn_time;
     public float time_current = -2.0f;
+    public float time_offset = -2.0f;
     float time_nextnote = 1.0f;
 
     // Input state var - 0 (space) 1 2 (left) 3 4 (right)
@@ -164,6 +165,7 @@ public class GameManager : MonoBehaviour
 
     }
     void DestroyNote(GameObject note) {
+
         ActiveNotes.Remove(note);
         Destroy(note);
     }
@@ -299,13 +301,6 @@ public class GameManager : MonoBehaviour
         else {
             current_combo = 0;
             miss_count += 1;
-            
-            if (hitVFXPrefab != null)
-            {
-                Vector3 hitPos = note.transform.position;
-                GameObject vfx = Instantiate(hitVFXPrefab, hitPos, Quaternion.identity);
-                Destroy(vfx, 1f); // 
-            }
         }
         
     }
@@ -339,15 +334,10 @@ public class GameManager : MonoBehaviour
             Debug.Log("Finished Song");
             currNote++;
         }
-        if (currNote > noteInfos.Count)
-        {
-            return;
-        }
 
         // Spawn Notes
         time_current += Time.deltaTime;
-        while (time_current >= (noteInfos[currNote].start_time - note_prespawn_time) ) {
-
+        while (currNote < noteInfos.Count && time_current >= (noteInfos[currNote].start_time - note_prespawn_time) ) {
             if (randomSpawnMode) {
                 time_nextnote += 60.0f/bpm;
 
@@ -358,9 +348,9 @@ public class GameManager : MonoBehaviour
                     SpawnNote(LaneIDToKey(note_lane), time_nextnote, NoteType.TAP);
 
                 } else if (note_lane == 5) {
-                    int note_lane1 = UnityEngine.Random.Range(1, 5);
-                    int note_lane2 = UnityEngine.Random.Range(1, 4);
-                    note_lane2 = (note_lane1 + note_lane2) % 4 + 1;
+                int note_lane1 = UnityEngine.Random.Range(1, 5);
+                int note_lane2 = UnityEngine.Random.Range(1, 4);
+                note_lane2 = (note_lane1 + note_lane2 - 1) % 4 + 1;
 
                     SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.TAP);
                     SpawnNote(LaneIDToKey(note_lane2), time_nextnote, NoteType.TAP);
@@ -379,7 +369,7 @@ public class GameManager : MonoBehaviour
                 switch (noteInfos[currNote].note_type)
                 {
                     case Beatmap.NoteInfo.BASIC_NOTE:
-                        SpawnNote(int.Parse(noteInfos[currNote].extra_info[0]), noteInfos[currNote].start_time, NoteType.TAP);
+                        SpawnNote(LaneIDToKey(int.Parse(noteInfos[currNote].extra_info[0])), noteInfos[currNote].start_time, NoteType.TAP);
                         break;
                     case Beatmap.NoteInfo.HOLD_NOTE:
                         Debug.Log("HOLD_NOTE_PLAYED");
@@ -464,11 +454,18 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
         // Handle Notes
         HandleNotes();
         // Handle Player Input
         HandleInput();
         
+        
+        if (time_current > 0.0f && !GetComponent<AudioSource>().isPlaying)
+        {
+            GetComponent<AudioSource>().Play();
+            time_current = time_offset;
+        }
+
     }
 }
