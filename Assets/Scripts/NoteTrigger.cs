@@ -10,6 +10,8 @@ public class NoteTrigger : MonoBehaviour
     //float nextNoteTime = 0f;
     Vector3 nextNotePosition;
 
+    public GameObject Disk;
+
     public TextMeshPro textMesh;
 
     // Update the keyCode and display

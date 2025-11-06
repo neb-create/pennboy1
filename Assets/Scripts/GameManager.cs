@@ -52,6 +52,7 @@ public class GameManager : MonoBehaviour
     public GameObject NotePrefab;
     public GameObject NotePrefabFull;
     public GameObject NoteTriggerPrefab;
+    public GameObject NoteTriggerPlayerPrefab;
 
     //VFX Prefabs
     [Header("VFX Prefabs")]
@@ -59,6 +60,7 @@ public class GameManager : MonoBehaviour
     public GameObject travelVFXPrefab;
     public GameObject slideVFXPrefab;
 
+    [Header("Config")]
     // Player Object
     public GameObject player;
 
@@ -78,7 +80,7 @@ public class GameManager : MonoBehaviour
     // Beatmap Loading
     private List<Beatmap.NoteInfo> noteInfos;
     private int currNote;
-    private bool randomSpawnMode;
+    public bool randomSpawnMode = true;
 
     void swapGameState()
     {
@@ -88,7 +90,7 @@ public class GameManager : MonoBehaviour
         foreach (Transform child in player.transform)
         {
             DestroyImmediate(child.gameObject);
-        }
+        };
 
         if (gamestate == GameState.RHYTHM)
             gamestate = GameState.BULLET;
@@ -132,7 +134,12 @@ public class GameManager : MonoBehaviour
             keyToObjMap[k] = newObj;
 
         }
-        keyToObjMap[KeyCode.Space] = player;
+        
+        // find the player note trigger object
+        GameObject pObj = Instantiate(NoteTriggerPlayerPrefab, player.transform);
+        pObj.GetComponent<NoteTrigger>().setKeyCode(KeyCode.Space);
+        keyToObjMap[KeyCode.Space] = pObj;
+
     }
 
     void SpawnNote(KeyCode key, float time, NoteType type) {
@@ -176,41 +183,24 @@ public class GameManager : MonoBehaviour
     // Handle Input Scection - 
     // This part of the code handles the player action of pressing any of the keys.
     // Needs to update to adapt to being able to use any key..
-    void HandleInput() {
-        
-        if (Input.anyKeyDown)
+    void HandleInput()
+    {
+        foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
         {
-            foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
-            {
-                if (Input.GetKeyDown(key))
-                {
+            if (Input.GetKeyDown(key))
+                if (keyToObjMap.ContainsKey(key))
                     HandleKeyDown(key);
-                    break;
-                }
-            }
-        }
 
-        /*
-        if (Input.anyKeyUp)
-        {
-            foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
-            {
-                if (Input.GetKeyUp(key))
-                {
+            if (Input.GetKeyUp(key))
+                if (keyToObjMap.ContainsKey(key))
                     HandleKeyUp(key);
-                    break;
-                }
-            }
         }
-        */
-
     }
+
     void HandleKeyDown(KeyCode keyId) {
         
         // Update State
         //InputState[keyId] = true;
-
-        Debug.Log("Key Down: " + keyId.ToString());
 
         // Find the closest note in lane
         GameObject hit_note = null;
@@ -236,10 +226,14 @@ public class GameManager : MonoBehaviour
                 ScoreNote(hit_note, hit_note_distance);
             }
         }
+
+        //update visual disk 
+        keyToObjMap[keyId].GetComponent<NoteTrigger>().Disk.GetComponent<VisualDisk>().SwitchToPressed();
+
     }
     void HandleKeyUp(KeyCode keyId) {
 
-        // FUNCTION CURRENTLY UNUSED
+        keyToObjMap[keyId].GetComponent<NoteTrigger>().Disk.GetComponent<VisualDisk>().SwitchToUnpressed();
 
         //Debug.Log("Key Up: " + keyId.ToString());
 
@@ -262,10 +256,11 @@ public class GameManager : MonoBehaviour
             {
                 Vector3 hitPos = note.transform.position;
                 GameObject vfx = Instantiate(hitVFXPrefab, hitPos, Quaternion.identity);
-                Destroy(vfx, 1f); // 
+                Destroy(vfx, 1f); 
             }
 
             DestroyNote(note);
+
         }
         else if (accuracy <= JUDGEMENT_GREAT_WINDOW) {
             current_combo += 1;
@@ -282,6 +277,7 @@ public class GameManager : MonoBehaviour
             }
 
             DestroyNote(note);
+            
         }
         else if (accuracy <= JUDGEMENT_BAD_WINDOW) {
             current_combo = 0;
@@ -297,6 +293,7 @@ public class GameManager : MonoBehaviour
             }
 
             DestroyNote(note);
+
         }
         else {
             current_combo = 0;
@@ -337,17 +334,20 @@ public class GameManager : MonoBehaviour
 
         // Spawn Notes
         time_current += Time.deltaTime;
-        while (currNote < noteInfos.Count && time_current >= (noteInfos[currNote].start_time - note_prespawn_time) ) {
-            if (randomSpawnMode) {
+        if (randomSpawnMode) {
+
+            // Random Spawn Mode
+            while (time_current >= (time_nextnote - note_prespawn_time) ) {
+
                 time_nextnote += 60.0f/bpm;
 
-                int note_lane = UnityEngine.Random.Range(1, 8); // [1 - 4]
+                int note_lane = UnityEngine.Random.Range(1, 12); // [1 - 4]
 
                 if (note_lane <= 4 && note_lane >= 1) {
 
                     SpawnNote(LaneIDToKey(note_lane), time_nextnote, NoteType.TAP);
 
-                } else if (note_lane == 5) {
+                } else if (note_lane == 5 || note_lane == 8 || note_lane == 10) {
                 int note_lane1 = UnityEngine.Random.Range(1, 5);
                 int note_lane2 = UnityEngine.Random.Range(1, 4);
                 note_lane2 = (note_lane1 + note_lane2 - 1) % 4 + 1;
@@ -355,7 +355,7 @@ public class GameManager : MonoBehaviour
                     SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.TAP);
                     SpawnNote(LaneIDToKey(note_lane2), time_nextnote, NoteType.TAP);
 
-                } else if (note_lane == 6) {
+                } else if (note_lane == 6 || note_lane == 9 || note_lane == 11) {
                     int note_lane1 = UnityEngine.Random.Range(1, 5);
                     int note_lane2 = UnityEngine.Random.Range(1, 5);
 
@@ -364,8 +364,14 @@ public class GameManager : MonoBehaviour
                 } else if (note_lane == 7) {
                     SpawnNote(LaneIDToKey(0), time_nextnote, NoteType.FULL);
                 }
+
             }
-            else {
+
+        } else {
+
+            // Load Beatmap Mode
+            while (currNote < noteInfos.Count && time_current >= (noteInfos[currNote].start_time - note_prespawn_time) ) {
+            
                 switch (noteInfos[currNote].note_type)
                 {
                     case Beatmap.NoteInfo.BASIC_NOTE:
@@ -383,29 +389,6 @@ public class GameManager : MonoBehaviour
                 }
                 currNote++;
             }
-
-            //if (note_lane <= 4 && note_lane >= 1) {
-
-            //    SpawnNote(note_lane, time_nextnote, NoteType.TAP);
-
-            //} else if (note_lane == 5) {
-            //    int note_lane1 = UnityEngine.Random.Range(1, 5);
-            //    int note_lane2 = UnityEngine.Random.Range(1, 4);
-            //    note_lane2 = (note_lane1 + note_lane2) % 4 + 1;
-                
-            //    SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
-            //    SpawnNote(note_lane2, time_nextnote, NoteType.TAP);
-
-            //} else if (note_lane == 6) {
-            //    int note_lane1 = UnityEngine.Random.Range(1, 5);
-            //    int note_lane2 = UnityEngine.Random.Range(1, 5);
-                
-            //    SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
-            //    SpawnNote(note_lane2, time_nextnote + 30.0f/bpm, NoteType.TAP);
-            //} else if (note_lane == 7) {
-            //    SpawnNote(0, time_nextnote, NoteType.FULL);
-            //}
-        
         }
 
         //Update Notes
@@ -445,7 +428,6 @@ public class GameManager : MonoBehaviour
         note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
         noteInfos = Beatmap.LoadBeatmap("Beatmap");
         currNote = 0;
-        randomSpawnMode = false;
 
         swapToRhythmGame();
 
