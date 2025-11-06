@@ -13,6 +13,9 @@ public class VisualDisk : MonoBehaviour
     float moveRadius = 0.12f;
     float moveSpeed = 0.8f;
     float pressed_scale = 0.94f;
+    float opacity_min = 0.08f;
+    float opacity_min_distance = 2.4f;
+    float opacity_max_distance = 0.6f;
 
     [Header("Colors")]
     public Color normalColor = new Color(0.82f, 0.88f, 1.0f);
@@ -23,6 +26,8 @@ public class VisualDisk : MonoBehaviour
     private Color currentColor;
     private bool isPressed = false;
     private float pressBlend = 0f;
+
+    public KeyCode key;
 
     void Start()
     {
@@ -42,8 +47,10 @@ public class VisualDisk : MonoBehaviour
 
         // --- Color ---
         Color targetColor = Color.Lerp(normalColor, pressedColor, pressBlend);
+        (GameObject o, float note_distance) = GameManager.instance.GetClosestNote(GameManager.instance.time_current, key);
+        targetColor.a = opacity_min + (1f - opacity_min) * (1f - Mathf.Clamp01((note_distance - opacity_max_distance) / (opacity_min_distance - opacity_max_distance)));
         rend.material.color = targetColor;
-
+        
         // --- Scale + motion ---
         float pulse = (Mathf.Sin(Time.time * pulseSpeed) + 1f) / 2f;
         Vector3 unpressedScale = Vector3.one * (1f + pulse * scaleAmount);

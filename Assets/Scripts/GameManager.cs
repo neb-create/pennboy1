@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Game Settings")]
     // Note Spawning System
-    public int bpm = 120;
+    public int bpm = 174;
 
     // Note Moving System
     List<GameObject> ActiveNotes = new List<GameObject>();
@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
     float note_z_despawn = -6.0f;
     float note_prespawn_time;
     public float time_current = -2.0f;
-    public float time_offset = -2.0f;
+    float time_offset = 0.0f;
     float time_nextnote = 1.0f;
 
     // Input state var - 0 (space) 1 2 (left) 3 4 (right)
@@ -50,8 +50,11 @@ public class GameManager : MonoBehaviour
     const int KEY_RIGHT_2 = 4;
 
     [Header("Note Prefab")]
-    public GameObject NotePrefab;
-    public GameObject NotePrefabFull;
+    public GameObject NotePrefabTap;
+    public GameObject NotePrefabHold;
+    public GameObject NotePrefabSlide;
+    public GameObject NotePrefabSwap;
+    public Material NoteMaterialSpace;
     public GameObject NoteTriggerPrefab;
     public GameObject NoteTriggerPlayerPrefab;
 
@@ -68,7 +71,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     // Note Types
-    public enum NoteType { TAP, HOLD, SLIDE, FULL };
+    public enum NoteType { TAP, HOLD, SLIDE, SWAP };
 
     public enum GameState { RHYTHM, BULLET };
     public GameState gamestate = GameState.RHYTHM;
@@ -152,17 +155,28 @@ public class GameManager : MonoBehaviour
 
     }
 
-    void SpawnNote(KeyCode key, float time, NoteType type) {
+    void SpawnNote(KeyCode key, float time, NoteType type, float length = 0.0f) {
 
         GameObject NoteToSpawn;
+        if (length <= 0.0f)
+        {
+            length = 60f/bpm/1f;
+        }
+        float time_end = time + length;
         switch (type)
         {
-            case NoteType.FULL:
-                NoteToSpawn = NotePrefabFull;
+            case NoteType.HOLD:
+                NoteToSpawn = NotePrefabHold;
+                break;
+            case NoteType.SWAP:
+                NoteToSpawn = NotePrefabSwap;
                 key = KeyCode.Space;
                 break;
+            case NoteType.SLIDE:
+                NoteToSpawn = NotePrefabSlide;
+                break;
             default:
-                NoteToSpawn = NotePrefab;
+                NoteToSpawn = NotePrefabTap;
                 break;
         }
         
@@ -171,11 +185,23 @@ public class GameManager : MonoBehaviour
         new_note.GetComponent<Note3D>().targetObject = keyToObjMap[key];
 
         new_note.GetComponent<Note3D>().time = time;
+        if (type == NoteType.HOLD)
+            new_note.GetComponent<HoldNote3D>().time_end = time_end;
+
+        // Set Color
+        if (key == KeyCode.Space)
+        {
+            Renderer[] childRenderers = new_note.GetComponentsInChildren<Renderer>();
+            foreach (Renderer rend in childRenderers)
+            {
+                rend.material = NoteMaterialSpace;
+            }
+        }
         
         // Attach moving glow
         if (travelVFXPrefab != null)
         {
-            GameObject trail = Instantiate(travelVFXPrefab, new_note.transform.position, Quaternion.identity, new_note.transform);
+            GameObject trail = Instantiate(travelVFXPrefab, new_note.transform.position, Quaternion.identity, new_note.transform.GetChild(0));
         }
 
         ActiveNotes.Add(new_note);
@@ -206,34 +232,59 @@ public class GameManager : MonoBehaviour
                     HandleKeyUp(key);
         }
     }
-
-    void HandleKeyDown(KeyCode keyId) {
-        
-        // Update State
-        //InputState[keyId] = true;
-
-        // Find the closest note in lane
+    public (GameObject, float) GetClosestNote(float t, KeyCode k)
+    {
         GameObject hit_note = null;
-        float hit_note_distance = float.MaxValue;
+        float closest_note_distance = float.MaxValue;
         foreach (GameObject note in ActiveNotes) {
-            KeyCode noteKey = note.GetComponent<Note3D>().key;
-            float note_time = note.GetComponent<Note3D>().time;
-            bool note_triggered = note.GetComponent<Note3D>().triggered;
-            if (noteKey == keyId && !note_triggered) {
-                float note_distance = Mathf.Abs(time_current - note_time);
-                if (note_distance < hit_note_distance) {
-                    hit_note = note;
-                    hit_note_distance = note_distance;
-                }
+
+            float note_distance = note.GetComponent<Note3D>().GetDistance(t, k);
+            if (note_distance < closest_note_distance) {
+                hit_note = note;
+                closest_note_distance = note_distance;
             }
         }
+
+        return (hit_note, closest_note_distance);
+    }
+    public (GameObject, float) GetActiveHoldNote(float t, KeyCode k)
+    {
+        foreach (GameObject note in ActiveNotes) {
+
+            // check if key matches
+            if (note.GetComponent<Note3D>().key != k) continue;
+            // check if it is a hold note
+            if (!(note.GetComponent<Note3D>() is HoldNote3D)) continue;
+            // check if it is on hold
+            if (!note.GetComponent<HoldNote3D>().on_hold) continue;
+
+            // else, return note
+            return (note, note.GetComponent<HoldNote3D>().GetDistance(t, k));
+        }
+
+        return (null, float.MaxValue);
+    }
+    void HandleKeyDown(KeyCode keyId) {
+        
+        // Find the closest note in lane
+        (GameObject hit_note, float hit_note_distance) = GetClosestNote(time_current, keyId);
 
         // check if the hit_note is valid
         if (hit_note != null)
         {
             if (hit_note_distance <= JUDGEMENT_BAD_WINDOW)
             {
+                
                 ScoreNote(hit_note, hit_note_distance);
+                // If hold note: don't destroy, else destory
+                if (!(hit_note.GetComponent<Note3D>() is HoldNote3D))
+                {
+                    DestroyNote(hit_note);
+                } else
+                {
+                    HoldNote3D hold_note = hit_note.GetComponent<HoldNote3D>();
+                    hold_note.on_hold = true;
+                }
             }
         }
 
@@ -243,12 +294,19 @@ public class GameManager : MonoBehaviour
     }
     void HandleKeyUp(KeyCode keyId) {
 
+        (GameObject hit_note, float hit_note_distance) = GetActiveHoldNote(time_current, keyId);
+
+        if (hit_note != null)
+        {
+            
+            ScoreNote(hit_note, hit_note_distance);
+            hit_note.GetComponent<Note3D>().Trigger();
+            DestroyNote(hit_note);
+
+        }
+
         keyToObjMap[keyId].GetComponent<NoteTrigger>().Disk.GetComponent<VisualDisk>().SwitchToUnpressed();
 
-        //Debug.Log("Key Up: " + keyId.ToString());
-
-        // Update State
-        //InputState[keyId] = false;
 
     }
     void ScoreNote(GameObject note, float accuracy) {
@@ -269,8 +327,6 @@ public class GameManager : MonoBehaviour
                 GameObject vfx = Instantiate(hitVFXPrefab, hitPos, Quaternion.identity);
                 Destroy(vfx, 1f); 
             }
-
-            DestroyNote(note);
             scoreTypeText.text = "PERFECT!";
             StartCoroutine(ScoreTypeTextAnimation());
         }
@@ -287,8 +343,6 @@ public class GameManager : MonoBehaviour
                 GameObject vfx = Instantiate(hitVFXPrefab, hitPos, Quaternion.identity);
                 Destroy(vfx, 1f); // 
             }
-
-            DestroyNote(note);
             scoreTypeText.text = "GREAT!";
             StartCoroutine(ScoreTypeTextAnimation());
 
@@ -305,8 +359,6 @@ public class GameManager : MonoBehaviour
                 GameObject vfx = Instantiate(hitVFXPrefab, hitPos, Quaternion.identity);
                 Destroy(vfx, 1f); // 
             }
-
-            DestroyNote(note);
             scoreTypeText.text = "BAD";
             scoreTypeText.color = Color.red;
             StartCoroutine(ScoreTypeTextAnimation());
@@ -363,16 +415,33 @@ public class GameManager : MonoBehaviour
 
                 time_nextnote += 60.0f/bpm;
 
-                int note_lane = UnityEngine.Random.Range(1, 12); // [1 - 4]
+                int note_lane = UnityEngine.Random.Range(1, 18);
 
                 if (note_lane <= 4 && note_lane >= 1) {
 
                     SpawnNote(LaneIDToKey(note_lane), time_nextnote, NoteType.TAP);
 
+                } else if (note_lane <= 15 && note_lane >= 12) {
+
+                    int hold_lane = note_lane - 11;
+                    SpawnNote(LaneIDToKey(hold_lane), time_nextnote, NoteType.HOLD);
+                    time_nextnote += 60.0f/bpm;
+
+                }  else if (note_lane == 16 || note_lane == 17) {
+
+                    int note_lane1 = UnityEngine.Random.Range(1, 5);
+                    int note_lane2 = UnityEngine.Random.Range(2, 3);
+                    note_lane2 = (note_lane1 + note_lane2 - 1) % 4 + 1;
+
+                    SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.HOLD);
+                    time_nextnote += 60.0f/bpm;
+                    SpawnNote(LaneIDToKey(note_lane2), time_nextnote, NoteType.TAP);
+
                 } else if (note_lane == 5 || note_lane == 8 || note_lane == 10) {
-                int note_lane1 = UnityEngine.Random.Range(1, 5);
-                int note_lane2 = UnityEngine.Random.Range(1, 4);
-                note_lane2 = (note_lane1 + note_lane2 - 1) % 4 + 1;
+
+                    int note_lane1 = UnityEngine.Random.Range(1, 5);
+                    int note_lane2 = UnityEngine.Random.Range(1, 4);
+                    note_lane2 = (note_lane1 + note_lane2 - 1) % 4 + 1;
 
                     SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.TAP);
                     SpawnNote(LaneIDToKey(note_lane2), time_nextnote, NoteType.TAP);
@@ -384,7 +453,7 @@ public class GameManager : MonoBehaviour
                     SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.TAP);
                     SpawnNote(LaneIDToKey(note_lane2), time_nextnote + 30.0f/bpm, NoteType.TAP);
                 } else if (note_lane == 7) {
-                    SpawnNote(LaneIDToKey(0), time_nextnote, NoteType.FULL);
+                    SpawnNote(LaneIDToKey(0), time_nextnote, NoteType.TAP);
                 }
 
             }
@@ -403,7 +472,7 @@ public class GameManager : MonoBehaviour
                         Debug.Log("HOLD_NOTE_PLAYED");
                         break;
                     case Beatmap.NoteInfo.SPACE_NOTE:
-                        SpawnNote(0, noteInfos[currNote].start_time, NoteType.FULL);
+                        SpawnNote(0, noteInfos[currNote].start_time, NoteType.TAP);
                         break;
                     case Beatmap.NoteInfo.SLIDE_NOTE:
                         Debug.Log("SLIDE_NOTE_PLAYED");
@@ -415,21 +484,18 @@ public class GameManager : MonoBehaviour
 
         //Update Notes
         foreach (GameObject note in ActiveNotes) {
+            
+            note.GetComponent<Note3D>().UpdatePosition(time_current, note_speed);
 
-            KeyCode note_key = note.GetComponent<Note3D>().key;
-            float note_time = note.GetComponent<Note3D>().time;
-            bool note_triggered = note.GetComponent<Note3D>().triggered;
-
-            Vector3 desired_pos = keyToObjMap[note_key].transform.position;
-            float t = time_current - note_time;
-            Vector3 note_direction = new Vector3(0.0f, 0.0f, -1.0f);//(desired_pos - new Vector3(0.0f, note_height_origin, 0.0f)).normalized;
-
-            note.transform.position = desired_pos + t * note_direction * note_speed;
-
-            //despawn notes
-            if (note_time + JUDGEMENT_BAD_WINDOW < time_current) {
-                if (!note_triggered) ScoreNote(note, 100.0f);
-                if (note.transform.position.z < note_z_despawn) ToRemoveNotes.Add(note);
+            // handle miss & despawn feature
+            if (note.GetComponent<Note3D>().GetDespawnTime() + JUDGEMENT_BAD_WINDOW < time_current) {
+                if (!note.GetComponent<Note3D>().triggered) {
+                    ScoreNote(note, 100.0f);
+                    note.GetComponent<Note3D>().Trigger();
+                }
+                if (note.transform.position.z < note_z_despawn) {
+                    ToRemoveNotes.Add(note);
+                }
             }
 
         }
@@ -446,6 +512,7 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        time_offset = 60f / (bpm * 2f) * 8f;
         instance = this;
         note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
         noteInfos = Beatmap.LoadBeatmap("Beatmap");

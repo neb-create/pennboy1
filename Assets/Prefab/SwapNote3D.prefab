@@ -122,7 +122,7 @@ GameObject:
   - component: {fileID: 5912001459945588843}
   - component: {fileID: 989880080070391093}
   m_Layer: 0
-  m_Name: TapNote3DCenter
+  m_Name: SwapNote3D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

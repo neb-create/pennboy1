@@ -20,6 +20,7 @@ public class NoteTrigger : MonoBehaviour
         keyCode = kc;
         keyDisplay = kc.ToString();
         textMesh.text = keyDisplay;
+        Disk.GetComponent<VisualDisk>().key = kc;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

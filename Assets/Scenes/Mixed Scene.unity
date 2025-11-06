@@ -467,9 +467,11 @@ MonoBehaviour:
   note_speed: 9
   note_height_origin: 22
   time_current: 1
-  time_offset: 1.379
-  NotePrefab: {fileID: 8451768978859604752, guid: 0dcc6899da3e11140ad525c8929cbb07, type: 3}
-  NotePrefabFull: {fileID: 8451768978859604752, guid: d65550880d7c13041be31dfcaa3e677f, type: 3}
+  NotePrefabTap: {fileID: 8451768978859604752, guid: 0dcc6899da3e11140ad525c8929cbb07, type: 3}
+  NotePrefabHold: {fileID: 8451768978859604752, guid: 7701a966a0635214f8d5ae732743b3ec, type: 3}
+  NotePrefabSlide: {fileID: 8451768978859604752, guid: acda00a3a4d30a544ae506aea9672b74, type: 3}
+  NotePrefabSwap: {fileID: 8451768978859604752, guid: d65550880d7c13041be31dfcaa3e677f, type: 3}
+  NoteMaterialSpace: {fileID: 2100000, guid: 4270c46495f92d649a807b311f4c15ee, type: 2}
   NoteTriggerPrefab: {fileID: 2093069400746597394, guid: 632cc8892ae9f924a9282f4ac434e35d, type: 3}
   NoteTriggerPlayerPrefab: {fileID: 2093069400746597394, guid: cff25d4318151db468b8797f9f4c8784, type: 3}
   hitVFXPrefab: {fileID: 7828873900810526531, guid: ee5803bb421304cc3b293ab237e15c04, type: 3}
@@ -477,7 +479,7 @@ MonoBehaviour:
   slideVFXPrefab: {fileID: 3637245434513059628, guid: 554db2d52233e446f833fb7e69b8990f, type: 3}
   player: {fileID: 99642052}
   gamestate: 0
-  randomSpawnMode: 0
+  randomSpawnMode: 1
   scoreText: {fileID: 1456002969}
   comboText: {fileID: 497129299}
   scoreTypeText: {fileID: 1718354715}
