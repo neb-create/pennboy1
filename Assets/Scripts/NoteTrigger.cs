@@ -7,7 +7,7 @@ public class NoteTrigger : MonoBehaviour
     KeyCode keyCode;
     string keyDisplay;
 
-    float nextNoteTime = 0f;
+    //float nextNoteTime = 0f;
     Vector3 nextNotePosition;
 
     public TextMeshPro textMesh;

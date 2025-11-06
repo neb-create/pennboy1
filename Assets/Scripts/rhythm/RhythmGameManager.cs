@@ -212,7 +212,7 @@ public class RhythmGameManager : MonoBehaviour
 
             time_nextnote += 60.0f/bpm;
 
-            int note_lane = UnityEngine.Random.Range(1, 8); // [1 - 7]
+            int note_lane = UnityEngine.Random.Range(1, 6); // [1 - 6]
 
 
             if (note_lane <= 4 && note_lane >= 1) {

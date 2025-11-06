@@ -154,7 +154,7 @@ MonoBehaviour:
   perfect_count: 0
   great_count: 0
   miss_count: 0
-  bpm: 120
+  bpm: 348
   time_current: -3
   note_speed: 9
   note_height_origin: 22

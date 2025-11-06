@@ -218,6 +218,7 @@ GameObject:
   - component: {fileID: 112312446}
   - component: {fileID: 112312445}
   - component: {fileID: 112312448}
+  - component: {fileID: 112312449}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -343,6 +344,21 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &112312449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 112312444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1000bb364b7b5b41be6f4e704da38f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sensitivity: 3
+  moveSpeed: 5
+  maxYAngle: 80
 --- !u!1 &257448153
 GameObject:
   m_ObjectHideFlags: 0
@@ -377,13 +393,14 @@ MonoBehaviour:
   max_combo: 0
   perfect_count: 0
   great_count: 0
+  bad_count: 0
   miss_count: 0
-  bpm: 120
+  bpm: 384
   note_speed: 9
   note_height_origin: 22
   time_current: -2
-  NotePrefab: {fileID: 8451768978859604752, guid: 05da343d194f3aa43999362bacfdb337, type: 3}
-  NotePrefabFull: {fileID: 8451768978859604752, guid: dd5f667f1bc662e4b99dfa65f92c0416, type: 3}
+  NotePrefab: {fileID: 8451768978859604752, guid: 0dcc6899da3e11140ad525c8929cbb07, type: 3}
+  NotePrefabFull: {fileID: 8451768978859604752, guid: 0dcc6899da3e11140ad525c8929cbb07, type: 3}
   NoteTriggerPrefab: {fileID: 2093069400746597394, guid: 632cc8892ae9f924a9282f4ac434e35d, type: 3}
   hitVFXPrefab: {fileID: 7828873900810526531, guid: ee5803bb421304cc3b293ab237e15c04, type: 3}
   travelVFXPrefab: {fileID: 3637245434513059628, guid: 8559467e6d88b4562b4f17cce95b54fd, type: 3}
@@ -486,7 +503,7 @@ Transform:
   m_GameObject: {fileID: 1316476070}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -0}
+  m_LocalPosition: {x: 0, y: -8, z: -0}
   m_LocalScale: {x: 50, y: 50, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

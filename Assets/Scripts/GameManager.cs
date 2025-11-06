@@ -11,14 +11,18 @@ public class GameManager : MonoBehaviour
     public int max_combo = 0;
     public int perfect_count = 0;
     public int great_count = 0;
+    public int bad_count = 0;
     public int miss_count = 0;
     const int SCORE_PERFECT = 100;
     const int SCORE_GREAT = 50;
+    const int SCORE_BAD = 0;
     const int PERFECT = 1;
     const int GREAT = 2;
+    const int BAD = 3;
     const int MISS = 0;
     const float JUDGEMENT_PERFECT_WINDOW = 0.08f;
-    const float JUDGEMENT_GREAT_WINDOW = 0.32f;
+    const float JUDGEMENT_GREAT_WINDOW = 0.24f;
+    const float JUDGEMENT_BAD_WINDOW = 0.32f;
 
     [Header("Game Settings")]
     // Note Spawning System
@@ -26,16 +30,17 @@ public class GameManager : MonoBehaviour
 
     // Note Moving System
     List<GameObject> ActiveNotes = new List<GameObject>();
+    Dictionary<KeyCode, GameObject> keyToObjMap = new Dictionary<KeyCode, GameObject>();
     public float note_speed = 9f;
     public float note_height_origin = 22f;
-    float note_height_spawn = 6.0f;
-    float note_height_despawn = -6.0f;
+    float note_z_spawn = 12.0f;
+    float note_z_despawn = -6.0f;
     float note_prespawn_time;
     public float time_current = -2.0f;
     float time_nextnote = 1.0f;
 
     // Input state var - 0 (space) 1 2 (left) 3 4 (right)
-    bool[] InputState = new bool[5];
+    //bool[] InputState = new bool[5];
     const int KEY_MIDDLE = 0;
     const int KEY_LEFT_1 = 1;
     const int KEY_LEFT_2 = 2;
@@ -67,24 +72,45 @@ public class GameManager : MonoBehaviour
     // Player Key 
     KeyCode playerKey = KeyCode.Space;
     // List of Keys used in gameplay
-    List<KeyCode> keyList = new List<KeyCode>() { KeyCode.Q, KeyCode.W, KeyCode.Space, KeyCode.I, KeyCode.O };
+    List<KeyCode> keyList = new List<KeyCode>() { KeyCode.W, KeyCode.E, KeyCode.Space, KeyCode.I, KeyCode.O };
 
     void swapGameState()
     {
+        
+        // Clean Up
+        keyToObjMap.Clear();
+        foreach (Transform child in player.transform)
+        {
+            DestroyImmediate(child.gameObject);
+        }
+
         if (gamestate == GameState.RHYTHM)
             gamestate = GameState.BULLET;
         else
             gamestate = GameState.RHYTHM;
     }
 
-    void swapToRhythmGame()
+    void swapToBulletHell()
     {
-        // TODO: cool special effects
-
         // Swap: 
         gamestate = GameState.RHYTHM;
+        swapGameState();
 
-        int i = -(keyList.Count)-1;
+        // Todo... bullet hell setup..
+
+
+    }
+
+    void swapToRhythmGame()
+    {
+        // Swap: 
+        gamestate = GameState.BULLET;
+        swapGameState();
+
+        // TODO: cool special effects
+
+
+        int i = -keyList.Count/2 - 1;
         foreach (KeyCode k in keyList)
         {
             i += 1;
@@ -93,30 +119,100 @@ public class GameManager : MonoBehaviour
             // Create Note Triggers
             GameObject newObj = Instantiate(NoteTriggerPrefab, player.transform);
 
-            newObj.transform.localPosition += new Vector3( 1f * i, 0.1f * Mathf.Abs(i), 0f );
+            newObj.transform.localPosition += new Vector3( 1.3f * i, 0.3f * Mathf.Abs(i), 0f );
 
             newObj.GetComponent<NoteTrigger>().setKeyCode(k);
 
+            keyToObjMap[k] = newObj;
+
         }
+        keyToObjMap[KeyCode.Space] = player;
+    }
+
+    void SpawnNote(KeyCode key, float time, NoteType type) {
+
+        GameObject NoteToSpawn;
+        switch (type)
+        {
+            case NoteType.FULL:
+                NoteToSpawn = NotePrefabFull;
+                key = KeyCode.Space;
+                break;
+            default:
+                NoteToSpawn = NotePrefab;
+                break;
+        }
+        
+        GameObject new_note = Instantiate(NoteToSpawn, new Vector3(0f,0f,0f), Quaternion.identity);
+        new_note.GetComponent<Note3D>().key = key;
+        new_note.GetComponent<Note3D>().targetObject = keyToObjMap[key];
+
+        new_note.GetComponent<Note3D>().time = time;
+        
+        // Attach moving glow
+        if (travelVFXPrefab != null)
+        {
+            GameObject trail = Instantiate(travelVFXPrefab, new_note.transform.position, Quaternion.identity, new_note.transform);
+        }
+
+        ActiveNotes.Add(new_note);
+
+    }
+    void DestroyNote(GameObject note) {
+        ActiveNotes.Remove(note);
+        Destroy(note);
     }
 
     
 
 
-    void HandleKeyDown(int keyId) {
+    // Handle Input Scection - 
+    // This part of the code handles the player action of pressing any of the keys.
+    // Needs to update to adapt to being able to use any key..
+    void HandleInput() {
+        
+        if (Input.anyKeyDown)
+        {
+            foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
+            {
+                if (Input.GetKeyDown(key))
+                {
+                    HandleKeyDown(key);
+                    break;
+                }
+            }
+        }
+
+        /*
+        if (Input.anyKeyUp)
+        {
+            foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
+            {
+                if (Input.GetKeyUp(key))
+                {
+                    HandleKeyUp(key);
+                    break;
+                }
+            }
+        }
+        */
+
+    }
+    void HandleKeyDown(KeyCode keyId) {
         
         // Update State
-        InputState[keyId] = true;
+        //InputState[keyId] = true;
+
+        Debug.Log("Key Down: " + keyId.ToString());
 
         // Find the closest note in lane
-        int keyLane = keyId;
         GameObject hit_note = null;
         float hit_note_distance = float.MaxValue;
         foreach (GameObject note in ActiveNotes) {
-            int note_lane = note.GetComponent<RhythmNote>().lane;
-            float note_time = note.GetComponent<RhythmNote>().time;
-            bool note_triggered = note.GetComponent<RhythmNote>().triggered;
-            if (note_lane == keyLane && !note_triggered) {
+            KeyCode noteKey = note.GetComponent<Note3D>().key;
+            float note_time = note.GetComponent<Note3D>().time;
+            bool note_triggered = note.GetComponent<Note3D>().triggered;
+            if (noteKey == keyId && !note_triggered) {
                 float note_distance = Mathf.Abs(time_current - note_time);
                 if (note_distance < hit_note_distance) {
                     hit_note = note;
@@ -128,48 +224,25 @@ public class GameManager : MonoBehaviour
         // check if the hit_note is valid
         if (hit_note != null)
         {
-            if (hit_note_distance <= JUDGEMENT_GREAT_WINDOW)
+            if (hit_note_distance <= JUDGEMENT_BAD_WINDOW)
             {
                 ScoreNote(hit_note, hit_note_distance);
             }
         }
     }
-    void HandleKeyUp(int keyId) {
+    void HandleKeyUp(KeyCode keyId) {
+
+        // FUNCTION CURRENTLY UNUSED
+
+        //Debug.Log("Key Up: " + keyId.ToString());
 
         // Update State
-        InputState[keyId] = false;
+        //InputState[keyId] = false;
 
     }
-    void HandleInput() {
-
-        // Placeholder buttons space w e i o
-        if (Input.GetKey("space") && !InputState[KEY_MIDDLE]) 
-            HandleKeyDown(KEY_MIDDLE);
-        if (Input.GetKey("w") && !InputState[KEY_LEFT_1]) 
-            HandleKeyDown(KEY_LEFT_1);
-        if (Input.GetKey("e") && !InputState[KEY_LEFT_2]) 
-            HandleKeyDown(KEY_LEFT_2);
-        if (Input.GetKey("i") && !InputState[KEY_RIGHT_1]) 
-            HandleKeyDown(KEY_RIGHT_1);
-        if (Input.GetKey("o") && !InputState[KEY_RIGHT_2]) 
-            HandleKeyDown(KEY_RIGHT_2);
-
-        if (!Input.GetKey("space") && InputState[KEY_MIDDLE]) 
-            HandleKeyUp(KEY_MIDDLE);
-        if (!Input.GetKey("w") && InputState[KEY_LEFT_1]) 
-            HandleKeyUp(KEY_LEFT_1);
-        if (!Input.GetKey("e") && InputState[KEY_LEFT_2]) 
-            HandleKeyUp(KEY_LEFT_2);
-        if (!Input.GetKey("i") && InputState[KEY_RIGHT_1]) 
-            HandleKeyUp(KEY_RIGHT_1);
-        if (!Input.GetKey("o") && InputState[KEY_RIGHT_2]) 
-            HandleKeyUp(KEY_RIGHT_2);
-
-    }
-
     void ScoreNote(GameObject note, float accuracy) {
         
-        note.GetComponent<RhythmNote>().Trigger();
+        note.GetComponent<Note3D>().Trigger();
 
         if (accuracy <= JUDGEMENT_PERFECT_WINDOW) {
             current_combo += 1;
@@ -203,52 +276,54 @@ public class GameManager : MonoBehaviour
 
             DestroyNote(note);
         }
+        else if (accuracy <= JUDGEMENT_BAD_WINDOW) {
+            current_combo = 0;
+            score += SCORE_BAD;
+            bad_count += 1;
+
+            // =Spawn VFX on Hit
+            if (hitVFXPrefab != null)
+            {
+                Vector3 hitPos = note.transform.position;
+                GameObject vfx = Instantiate(hitVFXPrefab, hitPos, Quaternion.identity);
+                Destroy(vfx, 1f); // 
+            }
+
+            DestroyNote(note);
+        }
         else {
             current_combo = 0;
             miss_count += 1;
+            
+            if (hitVFXPrefab != null)
+            {
+                Vector3 hitPos = note.transform.position;
+                GameObject vfx = Instantiate(hitVFXPrefab, hitPos, Quaternion.identity);
+                Destroy(vfx, 1f); // 
+            }
         }
         
     }
 
-    void SpawnNote(int lane, float time, NoteType type) {
 
-        GameObject NoteToSpawn;
-        switch (type)
+
+
+    KeyCode LaneIDToKey(int laneID)
+    {
+        switch (laneID)
         {
-            case NoteType.FULL:
-                NoteToSpawn = NotePrefabFull;
-                lane = 0;
-                break;
+            case 1:
+                return KeyCode.W;
+            case 2:
+                return KeyCode.E;
+            case 3:
+                return KeyCode.I;
+            case 4:
+                return KeyCode.O;
             default:
-                NoteToSpawn = NotePrefab;
-                break;
+                return KeyCode.Space;
         }
-        
-        GameObject new_note = Instantiate(NoteToSpawn, new Vector3(0f,0f,0f), Quaternion.identity);
-        new_note.GetComponent<RhythmNote>().lane = lane;
-        new_note.GetComponent<RhythmNote>().time = time;
-        
-        // Attach moving glow
-        if (travelVFXPrefab != null)
-        {
-            GameObject trail = Instantiate(travelVFXPrefab, new_note.transform.position, Quaternion.identity, new_note.transform);
-        }
-
-        ActiveNotes.Add(new_note);
-
     }
-    void DestroyNote(GameObject note) {
-        ActiveNotes.Remove(note);
-        Destroy(note);
-    }
-
-    Vector3 GetJudgementPosByLaneId(int lane) {
-
-        float x_pos = 0.0f;
-        if (lane >= 1 || lane <= 4) x_pos = (lane - 1.0f) * 2.8f - 4.2f;
-        return new Vector3(x_pos, -3.0f, 0.0f);
-    }
-
     void HandleNotes() {
 
         // Setup
@@ -260,29 +335,28 @@ public class GameManager : MonoBehaviour
 
             time_nextnote += 60.0f/bpm;
 
-            int note_lane = UnityEngine.Random.Range(1, 8); // [1 - 7]
-
+            int note_lane = UnityEngine.Random.Range(1, 8); // [1 - 4]
 
             if (note_lane <= 4 && note_lane >= 1) {
 
-                SpawnNote(note_lane, time_nextnote, NoteType.TAP);
+                SpawnNote(LaneIDToKey(note_lane), time_nextnote, NoteType.TAP);
 
             } else if (note_lane == 5) {
                 int note_lane1 = UnityEngine.Random.Range(1, 5);
                 int note_lane2 = UnityEngine.Random.Range(1, 4);
                 note_lane2 = (note_lane1 + note_lane2) % 4 + 1;
-                
-                SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
-                SpawnNote(note_lane2, time_nextnote, NoteType.TAP);
+
+                SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.TAP);
+                SpawnNote(LaneIDToKey(note_lane2), time_nextnote, NoteType.TAP);
 
             } else if (note_lane == 6) {
                 int note_lane1 = UnityEngine.Random.Range(1, 5);
                 int note_lane2 = UnityEngine.Random.Range(1, 5);
-                
-                SpawnNote(note_lane1, time_nextnote, NoteType.TAP);
-                SpawnNote(note_lane2, time_nextnote + 30.0f/bpm, NoteType.TAP);
+
+                SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.TAP);
+                SpawnNote(LaneIDToKey(note_lane2), time_nextnote + 30.0f/bpm, NoteType.TAP);
             } else if (note_lane == 7) {
-                SpawnNote(0, time_nextnote, NoteType.FULL);
+                SpawnNote(LaneIDToKey(0), time_nextnote, NoteType.FULL);
             }
         
         }
@@ -290,20 +364,20 @@ public class GameManager : MonoBehaviour
         //Update Notes
         foreach (GameObject note in ActiveNotes) {
 
-            int note_lane = note.GetComponent<RhythmNote>().lane;
-            float note_time = note.GetComponent<RhythmNote>().time;
-            bool note_triggered = note.GetComponent<RhythmNote>().triggered;
+            KeyCode note_key = note.GetComponent<Note3D>().key;
+            float note_time = note.GetComponent<Note3D>().time;
+            bool note_triggered = note.GetComponent<Note3D>().triggered;
 
-            Vector3 desired_pos = GetJudgementPosByLaneId(note_lane);
+            Vector3 desired_pos = keyToObjMap[note_key].transform.position;
             float t = time_current - note_time;
-            Vector3 note_direction = (desired_pos - new Vector3(0.0f, note_height_origin, 0.0f)).normalized;
+            Vector3 note_direction = new Vector3(0.0f, 0.0f, -1.0f);//(desired_pos - new Vector3(0.0f, note_height_origin, 0.0f)).normalized;
 
             note.transform.position = desired_pos + t * note_direction * note_speed;
 
             //despawn notes
-            if (note_time + JUDGEMENT_GREAT_WINDOW < time_current) {
+            if (note_time + JUDGEMENT_BAD_WINDOW < time_current) {
                 if (!note_triggered) ScoreNote(note, 100.0f);
-                if (note.transform.position.y < note_height_despawn) ToRemoveNotes.Add(note);
+                if (note.transform.position.z < note_z_despawn) ToRemoveNotes.Add(note);
             }
 
         }
@@ -321,7 +395,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         instance = this;
-        note_prespawn_time = (note_height_spawn - note_height_despawn) / note_speed;
+        note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
 
         swapToRhythmGame();
 
@@ -333,7 +407,6 @@ public class GameManager : MonoBehaviour
         
         // Handle Notes
         HandleNotes();
-
         // Handle Player Input
         HandleInput();
         
