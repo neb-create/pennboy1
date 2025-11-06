@@ -17,8 +17,8 @@ public class Beatmap
         TextAsset ta = Resources.Load<TextAsset>(filename);
         string[] mapLines = ta.text.Split("\n");
 
-        int prev_time = -1;
-        int prev_lane = -1;
+        float prev_time_f = -1;
+        int prev_lane_f = -1;
         foreach (string line in mapLines)
         {
             if (line.Length <= 1)
@@ -31,10 +31,10 @@ public class Beatmap
             float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60;
             time += float.Parse(tokens[1].Substring(minuteIndex + 1));
 
-            int prev_time = time / (60 / BPM);
+            int prev_time = (int)(time / (60f / BPM));
             int next_time = prev_time + 1;
 
-            if (Math.Abs(time - (prev_time * BPM)) > Math.Abs(time - (next_time * BPM)))
+            if (Mathf.Abs(time - (prev_time * (60f / BPM))) > Mathf.Abs(time - (next_time * (60f / BPM))))
             {
                 time = next_time;
             }
@@ -49,30 +49,30 @@ public class Beatmap
             {
                 case NoteInfo.BASIC_NOTE:
                     int lane = int.Parse(tokens[2]);
-                    if (!(prev_time == time && prev_lane == lane))
+                    if (!(prev_time_f == time && prev_lane_f == lane))
                     {
                         notes.Add(new NoteInfo(NoteInfo.BASIC_NOTE, time, new string[]{lane + ""}));
                     }
-                    prev_time = time;
-                    prev_lane = lane;
+                    prev_time_f = time;
+                    prev_lane_f = lane;
                     break;
                 case NoteInfo.HOLD_NOTE:
                     lane = int.Parse(tokens[2]);
                     string length = tokens[3];
-                    if (!(prev_time == time && prev_lane == lane))
+                    if (!(prev_time_f == time && prev_lane_f == lane))
                     {
                         notes.Add(new NoteInfo(NoteInfo.HOLD_NOTE, time, new string[] { lane + "", length }));
                     }
-                    prev_time = time;
-                    prev_lane = lane;
+                    prev_time_f = time;
+                    prev_lane_f = lane;
                     break;
                 case NoteInfo.SPACE_NOTE:
-                    if (!(prev_time == time && prev_lane == 5))
+                    if (!(prev_time_f == time && prev_lane_f == 5))
                     {
                         notes.Add(new NoteInfo(NoteInfo.SPACE_NOTE, time));
                     }
-                    prev_time = time;
-                    prev_lane = 5;
+                    prev_time_f = time;
+                    prev_lane_f = 5;
                     break;
                 case NoteInfo.SLIDE_NOTE:
                     float endtime = float.Parse(tokens[2]);
