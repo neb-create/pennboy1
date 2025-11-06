@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -81,6 +82,15 @@ public class GameManager : MonoBehaviour
     private List<Beatmap.NoteInfo> noteInfos;
     private int currNote;
     public bool randomSpawnMode = true;
+
+    [Header("UI/VFX")]
+    // UI Text
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI comboText;
+    [SerializeField] private TextMeshProUGUI scoreTypeText;
+    [SerializeField] private GameObject comboVfx;
+    private Color combo_inc_color;
+    private Color combo_init_color;
 
     void swapGameState()
     {
@@ -244,6 +254,7 @@ public class GameManager : MonoBehaviour
     void ScoreNote(GameObject note, float accuracy) {
         
         note.GetComponent<Note3D>().Trigger();
+        scoreTypeText.color = Color.white;
 
         if (accuracy <= JUDGEMENT_PERFECT_WINDOW) {
             current_combo += 1;
@@ -260,7 +271,8 @@ public class GameManager : MonoBehaviour
             }
 
             DestroyNote(note);
-
+            scoreTypeText.text = "PERFECT!";
+            StartCoroutine(ScoreTypeTextAnimation());
         }
         else if (accuracy <= JUDGEMENT_GREAT_WINDOW) {
             current_combo += 1;
@@ -277,7 +289,9 @@ public class GameManager : MonoBehaviour
             }
 
             DestroyNote(note);
-            
+            scoreTypeText.text = "GREAT!";
+            StartCoroutine(ScoreTypeTextAnimation());
+
         }
         else if (accuracy <= JUDGEMENT_BAD_WINDOW) {
             current_combo = 0;
@@ -293,9 +307,17 @@ public class GameManager : MonoBehaviour
             }
 
             DestroyNote(note);
+            scoreTypeText.text = "BAD";
+            scoreTypeText.color = Color.red;
+            StartCoroutine(ScoreTypeTextAnimation());
 
         }
-        else {
+        else
+        {
+            scoreTypeText.text = "MISS";
+            scoreTypeText.color = Color.red; 
+            StartCoroutine(ScoreTypeTextAnimation());
+
             current_combo = 0;
             miss_count += 1;
         }
@@ -429,6 +451,12 @@ public class GameManager : MonoBehaviour
         noteInfos = Beatmap.LoadBeatmap("Beatmap");
         currNote = 0;
 
+        string combo_inc_hex_color = "#B2ACFF";
+        ColorUtility.TryParseHtmlString(combo_inc_hex_color, out combo_inc_color);
+
+        string combo_init_hex_color = "#FFFFFFFF";
+        ColorUtility.TryParseHtmlString(combo_init_hex_color, out combo_init_color);
+
         swapToRhythmGame();
 
     }
@@ -449,5 +477,69 @@ public class GameManager : MonoBehaviour
             time_current = time_offset;
         }
 
+        scoreText.text = "SCORE: " + score;
+        
+        if (int.Parse(comboText.text) < current_combo)
+        {
+            StartCoroutine(ComboAnimation());
+        }
+        comboText.text = current_combo + "";
+
+        if (current_combo > 49)
+        {
+            comboVfx.SetActive(true);
+        } else
+        {
+            comboVfx.SetActive(false);
+        }
+    }
+
+    System.Collections.IEnumerator ComboAnimation()
+    {
+        float timer = 0f;
+        float time_to_finish = 0.2f;
+        float start_size = comboText.fontSize;
+        Color start_color = comboText.color;
+        while (timer < time_to_finish)
+        {
+            timer += Time.deltaTime;
+            // Lerp between the initial scale and the target scale
+            comboText.fontSize = Mathf.Lerp(start_size, 64, timer / time_to_finish);
+            comboText.color = Color.Lerp(start_color, combo_inc_color, timer / time_to_finish);
+            yield return null; // Wait for the next frame
+        }
+
+        StartCoroutine(ComboAnimationDec());
+    }
+
+    System.Collections.IEnumerator ComboAnimationDec()
+    {
+        float timer = 0f;
+        float time_to_finish = 0.2f;
+        while (timer < time_to_finish)
+        {
+            timer += Time.deltaTime;
+            // Lerp between the initial scale and the target scale
+            comboText.fontSize = Mathf.Lerp(64, 48, timer / time_to_finish);
+            comboText.color = Color.Lerp(combo_inc_color, combo_init_color, timer / time_to_finish);
+            yield return null; // Wait for the next frame
+        }
+        comboText.fontSize = 48; // Ensure the final scale is exactly the target scale
+        comboText.color = combo_init_color;
+    }
+
+    System.Collections.IEnumerator ScoreTypeTextAnimation()
+    {
+        float timer = 0f;
+        float time_to_finish = 0.3f;
+        while (timer < time_to_finish)
+        {
+            timer += Time.deltaTime;
+            // Lerp between the initial scale and the target scale
+            scoreTypeText.fontSize = Mathf.Lerp(36, 48, timer / time_to_finish);
+            yield return null; // Wait for the next frame
+        }
+        scoreTypeText.fontSize = 36; // Ensure the final scale is exactly the target scale
+        scoreTypeText.text = "";
     }
 }
