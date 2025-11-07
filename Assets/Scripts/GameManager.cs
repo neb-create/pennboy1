@@ -140,7 +140,7 @@ public class GameManager : MonoBehaviour
             // Create Note Triggers
             GameObject newObj = Instantiate(NoteTriggerPrefab, player.transform);
 
-            newObj.transform.localPosition += new Vector3( 1.3f * i, 0.3f * Mathf.Abs(i), 0f );
+            newObj.transform.localPosition += new Vector3( 1.32f * i, 0.12f * Mathf.Abs(i), 0f );
 
             newObj.GetComponent<NoteTrigger>().setKeyCode(k);
 
@@ -311,7 +311,6 @@ public class GameManager : MonoBehaviour
     }
     void ScoreNote(GameObject note, float accuracy) {
         
-        note.GetComponent<Note3D>().Trigger();
         scoreTypeText.color = Color.white;
 
         if (accuracy <= JUDGEMENT_PERFECT_WINDOW) {
@@ -415,7 +414,7 @@ public class GameManager : MonoBehaviour
 
                 time_nextnote += 60.0f/bpm;
 
-                int note_lane = UnityEngine.Random.Range(1, 18);
+                int note_lane = UnityEngine.Random.Range(1, 19);
 
                 if (note_lane <= 4 && note_lane >= 1) {
 
@@ -454,6 +453,9 @@ public class GameManager : MonoBehaviour
                     SpawnNote(LaneIDToKey(note_lane2), time_nextnote + 30.0f/bpm, NoteType.TAP);
                 } else if (note_lane == 7) {
                     SpawnNote(LaneIDToKey(0), time_nextnote, NoteType.TAP);
+                } else if (note_lane == 18) {
+                    SpawnNote(LaneIDToKey(0), time_nextnote, NoteType.HOLD);
+                    time_nextnote += 60.0f/bpm;
                 }
 
             }
@@ -571,7 +573,7 @@ public class GameManager : MonoBehaviour
         {
             timer += Time.deltaTime;
             // Lerp between the initial scale and the target scale
-            comboText.fontSize = Mathf.Lerp(start_size, 64, timer / time_to_finish);
+            comboText.fontSize = Mathf.Lerp(start_size, 72, timer / time_to_finish);
             comboText.color = Color.Lerp(start_color, combo_inc_color, timer / time_to_finish);
             yield return null; // Wait for the next frame
         }
@@ -587,11 +589,11 @@ public class GameManager : MonoBehaviour
         {
             timer += Time.deltaTime;
             // Lerp between the initial scale and the target scale
-            comboText.fontSize = Mathf.Lerp(64, 48, timer / time_to_finish);
+            comboText.fontSize = Mathf.Lerp(72, 64, timer / time_to_finish);
             comboText.color = Color.Lerp(combo_inc_color, combo_init_color, timer / time_to_finish);
             yield return null; // Wait for the next frame
         }
-        comboText.fontSize = 48; // Ensure the final scale is exactly the target scale
+        comboText.fontSize = 64; // Ensure the final scale is exactly the target scale
         comboText.color = combo_init_color;
     }
 

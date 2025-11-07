@@ -51,20 +51,28 @@ public class HoldNote3D : Note3D
 
         if (p0 != null)
         {
-            float dist = -(time_end - time) * note_speed / scale_const;
 
-            // if (on_hold)
-            // {
-            //     dist = -(time_end - time_current) * note_speed / scale_const;
-            // }
+            if (on_hold)
+            {
+                float dist = (time_end - time_current) * note_speed / scale_const;
 
-            p0.localPosition = dist / 2f * note_direction;
+                if (dist < 0f) dist = 0f;
+                p0.localPosition = (-t * note_direction * note_speed / scale_const) - (dist / 2f * note_direction);
+                p0.localScale = new Vector3(p0.localScale.x, p0.localScale.y, dist);
+            }
+            else
+            {
+                float dist = -(time_end - time) * note_speed / scale_const;
+                p0.localPosition = dist / 2f * note_direction;
+                p0.localScale = new Vector3(p0.localScale.x, p0.localScale.y, dist);
+            }
 
-            ParticleSystem ps = p0.GetComponent<ParticleSystem>();
+
+            /* ParticleSystem ps = p0.GetComponent<ParticleSystem>();
             var shape = ps.shape;
             Vector3 boxSize = shape.scale;
             boxSize.z = - (dist * scale_const) - 1.2f;
-            shape.scale = boxSize;
+            shape.scale = boxSize; */
 
         }
 

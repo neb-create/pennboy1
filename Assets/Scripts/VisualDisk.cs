@@ -10,7 +10,7 @@ public class VisualDisk : MonoBehaviour
     float scaleAmount = 0.1f;
     float pulseSpeed = 2.0f;
     float colorChangeSpeed = 10f;
-    float moveRadius = 0.12f;
+    float moveRadius = 0.16f;
     float moveSpeed = 0.8f;
     float pressed_scale = 0.94f;
     float opacity_min = 0.08f;
