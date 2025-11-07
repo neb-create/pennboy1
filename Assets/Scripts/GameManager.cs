@@ -534,18 +534,18 @@ public class GameManager : MonoBehaviour
                 switch (noteInfos[currNote].note_type)
                 {
                     case Beatmap.NoteInfo.BASIC_NOTE:
-                        Debug.Log("BASIC_NOTE_PLAYED");
+                        //Debug.Log("BASIC_NOTE_PLAYED");
                         SpawnNote(LaneIDToKey(int.Parse(noteInfos[currNote].extra_info[0])), noteInfos[currNote].start_time, NoteType.TAP);
                         break;
                     case Beatmap.NoteInfo.HOLD_NOTE:
-                        Debug.Log("HOLD_NOTE_PLAYED");
+                        //Debug.Log("HOLD_NOTE_PLAYED");
                         break;
                     case Beatmap.NoteInfo.SPACE_NOTE:
-                        Debug.Log("SPACE_NOTE_PLAYED");
+                        //Debug.Log("SPACE_NOTE_PLAYED");
                         SpawnNote(KeyCode.Space, noteInfos[currNote].start_time, NoteType.TAP);
                         break;
                     case Beatmap.NoteInfo.SLIDE_NOTE:
-                        Debug.Log("SLIDE_NOTE_PLAYED");
+                        //Debug.Log("SLIDE_NOTE_PLAYED");
                         break;
                 }
                 currNote++;

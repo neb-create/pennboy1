@@ -19,8 +19,22 @@ public class Beatmap
 
         float prev_time_f = -1;
         int prev_lane_f = -1;
+        int line_index = -1;
+        float global_offset = 0f;
         foreach (string line in mapLines)
         {
+            line_index++;
+
+            if (line_index == 0 || line_index == 2)
+            {
+                continue;
+            }
+            if (line_index == 1)
+            {
+                global_offset = float.Parse(line);
+                continue;
+            }
+
             if (line.Length <= 1)
             {
                 continue;
@@ -28,7 +42,7 @@ public class Beatmap
             //Debug.Log(line);
             string[] tokens = line.Split(" ");
             int minuteIndex = tokens[1].IndexOf(":");
-            float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60;
+            float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60 + global_offset;
             time += float.Parse(tokens[1].Substring(minuteIndex + 1));
 
             int prev_time = (int)(time / (60f / BPM));
