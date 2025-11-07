@@ -4,12 +4,12 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody rb;
     private Vector2 dir;
-    [SerializeField] float speed = 5f;
+    [SerializeField] float speed = 10f;
 
     [Header("Dash Attributes")]
     [SerializeField] float dashSpeed = 30f;
-    [SerializeField] float dashDuration = 0.2f; //in seconds
-    [SerializeField] float dashCooldown = 1f;
+    [SerializeField] float dashDuration = 0.1f; //in seconds
+    [SerializeField] float dashCooldown = 0.5f;
     private float timeWhenDashStart;
     private bool isDashing = false;
     public bool IsDashing()
@@ -26,6 +26,10 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Don't do anything if in rhythm game state
+        if (GameManager.instance.gamestate == GameManager.GameState.RHYTHM) return;
+
+        // Else
         dir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
 
         if (!isDashing)
@@ -44,8 +48,14 @@ public class PlayerController : MonoBehaviour
     }
     void FixedUpdate()
     {
+        // Don't do anything if in rhythm game state
+        if (GameManager.instance.gamestate == GameManager.GameState.RHYTHM) return;
+        
+        // Else
         if(!isDashing) rb.linearVelocity = dir * speed;
+        
     }
+
     void Dash()
     {
         /*

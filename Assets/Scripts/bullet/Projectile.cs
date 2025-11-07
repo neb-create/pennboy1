@@ -58,7 +58,7 @@ public class Projectile : MonoBehaviour
         {
             if (!lockedOn)
             {
-                Vector3 playerPos = BulletHellManager.instance.player.transform.position;
+                Vector3 playerPos = GameManager.instance.player.transform.position;
                 targetDir = (playerPos - this.transform.position).normalized;
                 speed = lockedOnSpeed;
                 lockedOn = true;
@@ -74,7 +74,7 @@ public class Projectile : MonoBehaviour
     {
         if (!rend.isVisible)
         {
-            BulletHellManager.instance.masterProjectilePool.Release(this.gameObject);
+            GameManager.instance.masterProjectilePool.Release(this.gameObject);
         }
         elapsedTime += Time.deltaTime;
     }

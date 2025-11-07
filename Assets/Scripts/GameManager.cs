@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.Pool;
 
 public class GameManager : MonoBehaviour
 {
@@ -39,7 +40,7 @@ public class GameManager : MonoBehaviour
     float note_prespawn_time;
     public float time_current = -2.0f;
     float time_offset = 0.0f;
-    float time_nextnote = 1.0f;
+    float time_nextnote = 5.0f;
 
     // Input state var - 0 (space) 1 2 (left) 3 4 (right)
     //bool[] InputState = new bool[5];
@@ -67,6 +68,7 @@ public class GameManager : MonoBehaviour
     [Header("Config")]
     // Player Object
     public GameObject player;
+    public GameObject gameCamera;
 
     public static GameManager instance;
 
@@ -75,6 +77,8 @@ public class GameManager : MonoBehaviour
 
     public enum GameState { RHYTHM, BULLET };
     public GameState gamestate = GameState.RHYTHM;
+    private bool swapToBulletFlag = false;
+    private bool swapToRhythmFlag = false;
 
     // Player Key 
     KeyCode playerKey = KeyCode.Space;
@@ -85,6 +89,7 @@ public class GameManager : MonoBehaviour
     private List<Beatmap.NoteInfo> noteInfos;
     private int currNote;
     public bool randomSpawnMode = true;
+    public bool spawnSwapNotes = true;
 
     [Header("UI/VFX")]
     // UI Text
@@ -95,15 +100,40 @@ public class GameManager : MonoBehaviour
     private Color combo_inc_color;
     private Color combo_init_color;
 
+    [Header("Bullet Hell")]
+    public GameObject PlaceholderDefaultEmitter;
+    public ObjectPool<GameObject> masterProjectilePool;
+    public int defaultPoolSize = 50;
+    public int maxPoolSize = 100;
+    [SerializeField] GameObject bulletPrefab;
+    public List<Pair> emitters = new List<Pair>();
+    private int emitterIndex = 0;
+    private float timePerBeat = 0.5f;
+    private float bulletHellStartTime;
+
+
     void swapGameState()
     {
-        
-        // Clean Up
+
+        swapToRhythmFlag = false;
+        swapToBulletFlag = false;
+
+        // Clean Up player
+        player.transform.position = Vector3.zero;
+        player.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+        player.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+        player.GetComponent<Rigidbody>().Sleep();   
+        // Clean Up rhythm game stuff
         keyToObjMap.Clear();
-        foreach (Transform child in player.transform)
+        for (int i = player.transform.childCount - 1; i >= 0; i--)
         {
-            DestroyImmediate(child.gameObject);
-        };
+            DestroyImmediate(player.transform.GetChild(i).gameObject);
+        }
+        for (int i = ActiveNotes.Count - 1; i >= 0; i--)
+        {
+            DestroyImmediate(ActiveNotes[i]);
+        }
+        ActiveNotes.Clear();
 
         if (gamestate == GameState.RHYTHM)
             gamestate = GameState.BULLET;
@@ -111,24 +141,15 @@ public class GameManager : MonoBehaviour
             gamestate = GameState.RHYTHM;
     }
 
-    void swapToBulletHell()
-    {
-        // Swap: 
-        gamestate = GameState.RHYTHM;
-        swapGameState();
-
-        // Todo... bullet hell setup..
-
-
-    }
-
     void swapToRhythmGame()
     {
+        
         // Swap: 
         gamestate = GameState.BULLET;
         swapGameState();
 
         // TODO: cool special effects
+        gameCamera.GetComponent<GameCamera>().TransitionToRhythmGame();
 
 
         int i = -keyList.Count/2 - 1;
@@ -309,8 +330,15 @@ public class GameManager : MonoBehaviour
 
 
     }
-    void ScoreNote(GameObject note, float accuracy) {
+
+    void ScoreSwapNote(GameObject note) {
         
+        swapToBulletFlag = true;
+
+    }
+
+    void ScoreNote(GameObject note, float accuracy) {
+
         scoreTypeText.color = Color.white;
 
         if (accuracy <= JUDGEMENT_PERFECT_WINDOW) {
@@ -372,6 +400,11 @@ public class GameManager : MonoBehaviour
             current_combo = 0;
             miss_count += 1;
         }
+
+        // if is swap note: trigger swap
+        if (note.GetComponent<Note3D>() is SwapNote3D) {
+            ScoreSwapNote(note);
+        }
         
     }
 
@@ -414,7 +447,7 @@ public class GameManager : MonoBehaviour
 
                 time_nextnote += 60.0f/bpm;
 
-                int note_lane = UnityEngine.Random.Range(1, 19);
+                int note_lane = UnityEngine.Random.Range(1, 25);
 
                 if (note_lane <= 4 && note_lane >= 1) {
 
@@ -429,14 +462,31 @@ public class GameManager : MonoBehaviour
                 }  else if (note_lane == 16 || note_lane == 17) {
 
                     int note_lane1 = UnityEngine.Random.Range(1, 5);
-                    int note_lane2 = UnityEngine.Random.Range(2, 3);
-                    note_lane2 = (note_lane1 + note_lane2 - 1) % 4 + 1;
+                    int note_lane1_limiter = note_lane1;
+                    if (note_lane1_limiter == 3 || note_lane1_limiter == 1) note_lane1_limiter += 1;
+                    int note_lane2 = UnityEngine.Random.Range(1, 3);
+                    note_lane2 = (note_lane1_limiter + note_lane2 - 1) % 4 + 1;
 
                     SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.HOLD);
                     time_nextnote += 60.0f/bpm;
                     SpawnNote(LaneIDToKey(note_lane2), time_nextnote, NoteType.TAP);
 
-                } else if (note_lane == 5 || note_lane == 8 || note_lane == 10) {
+                } else if (note_lane == 23) {
+
+                    int note_lane1 = UnityEngine.Random.Range(1, 5);
+                    int note_lane1_limiter = note_lane1;
+                    if (note_lane1_limiter == 3 || note_lane1_limiter == 1) note_lane1_limiter += 1;
+                    int note_lane2 = UnityEngine.Random.Range(1, 3);
+                    note_lane2 = (note_lane1_limiter + note_lane2 - 1) % 4 + 1;
+                    int note_lane3 = UnityEngine.Random.Range(1, 3);
+                    note_lane3 = (note_lane1_limiter + note_lane3 - 1) % 4 + 1;
+
+                    SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.HOLD);
+                    SpawnNote(LaneIDToKey(note_lane2), time_nextnote + 30.0f/bpm, NoteType.TAP);
+                    SpawnNote(LaneIDToKey(note_lane3), time_nextnote + 60.0f/bpm, NoteType.TAP);
+                    time_nextnote += 60.0f/bpm;
+
+                } else if (note_lane == 5 || note_lane == 8 || note_lane == 10 || note_lane == 21 || note_lane == 24) {
 
                     int note_lane1 = UnityEngine.Random.Range(1, 5);
                     int note_lane2 = UnityEngine.Random.Range(1, 4);
@@ -445,7 +495,7 @@ public class GameManager : MonoBehaviour
                     SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.TAP);
                     SpawnNote(LaneIDToKey(note_lane2), time_nextnote, NoteType.TAP);
 
-                } else if (note_lane == 6 || note_lane == 9 || note_lane == 11) {
+                } else if (note_lane == 6 || note_lane == 9 || note_lane == 11 || note_lane == 22) {
                     int note_lane1 = UnityEngine.Random.Range(1, 5);
                     int note_lane2 = UnityEngine.Random.Range(1, 5);
 
@@ -456,6 +506,22 @@ public class GameManager : MonoBehaviour
                 } else if (note_lane == 18) {
                     SpawnNote(LaneIDToKey(0), time_nextnote, NoteType.HOLD);
                     time_nextnote += 60.0f/bpm;
+                } else if (note_lane == 19) {
+
+                    if (spawnSwapNotes) {
+                        SpawnNote(LaneIDToKey(0), time_nextnote, NoteType.SWAP);
+                        time_nextnote += 480.0f/bpm;
+                    } else
+                    {
+                        int note_lane1 = UnityEngine.Random.Range(1, 5);
+                        int note_lane2 = UnityEngine.Random.Range(1, 4);
+                        note_lane2 = (note_lane1 + note_lane2 - 1) % 4 + 1;
+
+                        SpawnNote(LaneIDToKey(note_lane1), time_nextnote, NoteType.HOLD);
+                        SpawnNote(LaneIDToKey(note_lane2), time_nextnote, NoteType.HOLD);
+                        time_nextnote += 60.0f/bpm;
+                    }
+
                 }
 
             }
@@ -468,13 +534,15 @@ public class GameManager : MonoBehaviour
                 switch (noteInfos[currNote].note_type)
                 {
                     case Beatmap.NoteInfo.BASIC_NOTE:
+                        Debug.Log("BASIC_NOTE_PLAYED");
                         SpawnNote(LaneIDToKey(int.Parse(noteInfos[currNote].extra_info[0])), noteInfos[currNote].start_time, NoteType.TAP);
                         break;
                     case Beatmap.NoteInfo.HOLD_NOTE:
                         Debug.Log("HOLD_NOTE_PLAYED");
                         break;
                     case Beatmap.NoteInfo.SPACE_NOTE:
-                        SpawnNote(0, noteInfos[currNote].start_time, NoteType.TAP);
+                        Debug.Log("SPACE_NOTE_PLAYED");
+                        SpawnNote(KeyCode.Space, noteInfos[currNote].start_time, NoteType.TAP);
                         break;
                     case Beatmap.NoteInfo.SLIDE_NOTE:
                         Debug.Log("SLIDE_NOTE_PLAYED");
@@ -509,58 +577,6 @@ public class GameManager : MonoBehaviour
 
         }
 
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        time_offset = 60f / (bpm * 2f) * 8f;
-        instance = this;
-        note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
-        noteInfos = Beatmap.LoadBeatmap("Beatmap");
-        currNote = 0;
-
-        string combo_inc_hex_color = "#B2ACFF";
-        ColorUtility.TryParseHtmlString(combo_inc_hex_color, out combo_inc_color);
-
-        string combo_init_hex_color = "#FFFFFFFF";
-        ColorUtility.TryParseHtmlString(combo_init_hex_color, out combo_init_color);
-
-        swapToRhythmGame();
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-        // Handle Notes
-        HandleNotes();
-        // Handle Player Input
-        HandleInput();
-        
-        
-        if (time_current > 0.0f && !GetComponent<AudioSource>().isPlaying)
-        {
-            GetComponent<AudioSource>().Play();
-            time_current = time_offset;
-        }
-
-        scoreText.text = "SCORE: " + score;
-        
-        if (int.Parse(comboText.text) < current_combo)
-        {
-            StartCoroutine(ComboAnimation());
-        }
-        comboText.text = current_combo + "";
-
-        if (current_combo > 49)
-        {
-            comboVfx.SetActive(true);
-        } else
-        {
-            comboVfx.SetActive(false);
-        }
     }
 
     System.Collections.IEnumerator ComboAnimation()
@@ -610,5 +626,169 @@ public class GameManager : MonoBehaviour
         }
         scoreTypeText.fontSize = 36; // Ensure the final scale is exactly the target scale
         scoreTypeText.text = "";
+    }
+
+    // Update is called once per frame
+    void UpdateRhythm()
+    {
+
+        // Handle Notes
+        HandleNotes();
+        // Handle Player Input
+        HandleInput();
+        
+        
+        if (time_current > 0.0f && !GetComponent<AudioSource>().isPlaying)
+        {
+            GetComponent<AudioSource>().Play();
+            time_current = time_offset;
+        }
+
+        scoreText.text = "SCORE: " + score;
+        
+        if (int.Parse(comboText.text) < current_combo)
+        {
+            StartCoroutine(ComboAnimation());
+        }
+        comboText.text = current_combo + "";
+
+        if (current_combo > 49)
+        {
+            comboVfx.SetActive(true);
+        } else
+        {
+            comboVfx.SetActive(false);
+        }
+
+        if (swapToBulletFlag)
+        {
+            swapToBulletHell();
+            swapToBulletFlag = false;
+        }
+
+    }
+
+    // ============================================== //
+    // =========== Bullet Hell Section ============== //
+    // ============================================== //
+
+    void swapToBulletHell()
+    {
+        // Swap: 
+        gamestate = GameState.RHYTHM;
+        swapGameState();
+
+        // player
+        player.GetComponent<Rigidbody>().WakeUp();   
+
+        // Todo... bullet hell setup..
+        gameCamera.GetComponent<GameCamera>().TransitionToBulletHell();
+
+        masterProjectilePool = new ObjectPool<GameObject>(
+            CreatePooledBullet,
+            OnGetBullet,
+            OnReleaseBullet,
+            OnDestroyBullet,
+            collectionCheck: false,
+            defaultCapacity: defaultPoolSize,
+            maxSize: maxPoolSize
+        );
+        bulletHellStartTime = Time.time; //TODO: i am just setting this to the time the bullet hell manager is activated
+
+    }
+    
+    void UpdateBullet()
+    {
+        //emitters will be set active on a certain beat 
+        //ex: 240 bpm, 3 min song = 720 beats and each emitter is released on one of those beats
+        //will continuously set projectile emitters to active
+        if (emitterIndex >= emitters.Count)
+        {
+            OnBulletHellComplete();
+
+        } else {
+            
+            Pair p = emitters[emitterIndex];
+
+            if (p.emitter == null)
+            {
+                p.emitter = Instantiate(PlaceholderDefaultEmitter);
+                p.emitter.SetActive(false);
+            }
+
+            if (Time.time >= bulletHellStartTime + p.beatToActivate * timePerBeat)
+            {
+                p.emitter.SetActive(true);
+                emitterIndex++;
+                if (emitterIndex == emitters.Count)
+                {
+                    OnBulletHellComplete();
+                }
+            }
+        }
+
+        if (swapToRhythmFlag)
+        {
+            swapToRhythmGame();
+            swapToRhythmFlag = false;
+        }
+    }
+
+    void OnBulletHellComplete()
+    {
+        emitterIndex = 0;
+        swapToRhythmFlag = true;
+        //gameObject.SetActive(false);
+        //TODO something (placeholder^^)
+    }
+
+    public GameObject CreatePooledBullet()
+    {
+        GameObject proj = Instantiate(bulletPrefab);
+        proj.SetActive(false);
+        return proj;
+    }
+
+    public void OnGetBullet(GameObject bullet) {
+        bullet.SetActive(true);
+    }
+    public void OnReleaseBullet(GameObject bullet) {
+        bullet.SetActive(false);
+    }
+    public void OnDestroyBullet(GameObject bullet) {
+        Destroy(bullet);
+    }
+
+    void Update()
+    {
+        if (gamestate == GameState.RHYTHM)
+        {
+            UpdateRhythm();
+        }
+        else
+        {
+            UpdateBullet();
+        }
+    }
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+
+        // Rhythm game setup
+        time_offset = 60f / (bpm * 2f) * 8f;
+        instance = this;
+        note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
+        noteInfos = Beatmap.LoadBeatmap("Beatmap");
+        currNote = 0;
+
+        string combo_inc_hex_color = "#B2ACFF";
+        ColorUtility.TryParseHtmlString(combo_inc_hex_color, out combo_inc_color);
+
+        string combo_init_hex_color = "#FFFFFFFF";
+        ColorUtility.TryParseHtmlString(combo_init_hex_color, out combo_init_color);
+
+        swapToRhythmGame();
+
     }
 }

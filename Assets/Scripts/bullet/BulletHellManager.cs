@@ -12,7 +12,7 @@ public class BulletHellManager : MonoBehaviour
     [SerializeField] GameObject bulletPrefab;
     public List<Pair> emitters = new List<Pair>();
     private int emitterIndex = 0;
-    private int bpm = 384;
+    //private int bpm = 384;
     private float timePerBeat = 0.5f;
     private float bulletHellStartTime;
 

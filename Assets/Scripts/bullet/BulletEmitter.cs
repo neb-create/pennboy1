@@ -14,7 +14,7 @@ public class BulletEmitter : MonoBehaviour
     [Header("General (all of this is for bullet ngl except nunrounds)")]
     [SerializeField] BulletAttributePreset preset;
     //[SerializeField] GameObject aoePrefab; //you don't need a prefab for aoe bc it's hard coded
-    private BulletHellManager manager;
+    private GameManager manager;
     [SerializeField] int numToEmitPerRound = 1;
     public int NumToEmitPerRound => numToEmitPerRound;
     [SerializeField] int numRounds = 5;
@@ -32,7 +32,7 @@ public class BulletEmitter : MonoBehaviour
     void Start()
     {
         elapsedTime = timeBetweenRounds; //ensure that guaranteed to emit when update runs for first time
-        manager = BulletHellManager.instance;
+        manager = GameManager.instance;
 
         if (emitPerBeat) timeBetweenRounds = 60.0f / bpm;
     }

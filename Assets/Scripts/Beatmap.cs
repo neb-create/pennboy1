@@ -25,7 +25,7 @@ public class Beatmap
             {
                 continue;
             }
-            Debug.Log(line);
+            //Debug.Log(line);
             string[] tokens = line.Split(" ");
             int minuteIndex = tokens[1].IndexOf(":");
             float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60;
@@ -43,7 +43,7 @@ public class Beatmap
                 time = prev_time * (60f / BPM);
             }
 
-            Debug.Log(time);
+            //Debug.Log(time);
 
 
 
@@ -55,6 +55,8 @@ public class Beatmap
                     {
                         notes.Add(new NoteInfo(NoteInfo.BASIC_NOTE, time, new string[]{lane + ""}));
                     }
+                    //Debug.Log(time);
+                    //Debug.Log(new string[]{lane + ""});
                     prev_time_f = time;
                     prev_lane_f = lane;
                     break;
