@@ -48,7 +48,7 @@ public class BulletEmitter : MonoBehaviour
             elapsedTime = 0;
         }
 
-        if (roundsEmitted == numRounds) Destroy(this.gameObject);
+        if (roundsEmitted == numRounds) gameObject.SetActive(false);
     }
     void Emit()
     {
