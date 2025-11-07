@@ -267,7 +267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timerText: {fileID: 1813571822}
-  global_offset: 0.32
+  global_offset: 0.25
 --- !u!82 &297351432
 AudioSource:
   m_ObjectHideFlags: 0
