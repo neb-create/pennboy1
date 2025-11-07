@@ -6,16 +6,18 @@ public class AreaDamage : MonoBehaviour
     /*[Header("Preset (leave blank if you're hardcoding the objects)")]
     [SerializeField] AreaDamageAttributePreset preset;*/
     //commented out bc i presume we will be hardcoding attributes like size
-    
+
     [Header("General Attributes")]
     [SerializeField] private float damage;
+    [SerializeField] bool lifetimeInBeats;
+    private float lifetimeBeats;
     [SerializeField] private float lifetime;
     private float elapsedTime;
     private float damageCooldown = 1f;
     private float lastDamageInstanceTime = -1;
     void Start()
-    {  
-        
+    {
+        lifetimeBeats = lifetime * (60f / GameManager.instance.bpm);
     }
 
     // Update is called once per frame
@@ -26,7 +28,9 @@ public class AreaDamage : MonoBehaviour
     void Update()
     {
         elapsedTime += Time.deltaTime;
-        if (elapsedTime > lifetime)
+        float effectiveLifetime = lifetime;
+        if (lifetimeInBeats) effectiveLifetime = lifetimeBeats;
+        if (elapsedTime > effectiveLifetime)
         {
             gameObject.SetActive(false);
             elapsedTime = 0;

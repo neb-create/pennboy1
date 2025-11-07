@@ -148,6 +148,9 @@ public class GameManager : MonoBehaviour
         gamestate = GameState.BULLET;
         swapGameState();
 
+        //clear bullet hell stuff
+        ClearBulletHell();
+
         // TODO: cool special effects
         gameCamera.GetComponent<GameCamera>().TransitionToRhythmGame();
 
@@ -679,7 +682,7 @@ public class GameManager : MonoBehaviour
         swapGameState();
 
         // player
-        player.GetComponent<Rigidbody>().WakeUp();   
+        player.GetComponent<Rigidbody>().WakeUp();
 
         // Todo... bullet hell setup..
         gameCamera.GetComponent<GameCamera>().TransitionToBulletHell();
@@ -695,6 +698,13 @@ public class GameManager : MonoBehaviour
         );
         bulletHellStartTime = Time.time; //TODO: i am just setting this to the time the bullet hell manager is activated
 
+    }
+    void ClearBulletHell()
+    {
+        foreach(BulletEmitter ae in GetComponentsInChildren<BulletEmitter>())
+        {
+            ae.gameObject.SetActive(false);
+        }
     }
     
     void UpdateBullet()
