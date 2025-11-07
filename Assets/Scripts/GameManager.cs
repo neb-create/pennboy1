@@ -143,13 +143,17 @@ public class GameManager : MonoBehaviour
 
     void swapToRhythmGame()
     {
+        //clear bullet hell stuff
+        if (masterProjectilePool != null)
+        {
+            masterProjectilePool.Clear();
+            Debug.Log("clear pool");
+        }
+        ClearBulletHell();
         
         // Swap: 
         gamestate = GameState.BULLET;
         swapGameState();
-
-        //clear bullet hell stuff
-        ClearBulletHell();
 
         // TODO: cool special effects
         gameCamera.GetComponent<GameCamera>().TransitionToRhythmGame();
