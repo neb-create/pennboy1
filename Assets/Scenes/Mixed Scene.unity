@@ -477,7 +477,7 @@ MonoBehaviour:
   player: {fileID: 2005414062}
   gameCamera: {fileID: 112312444}
   gamestate: 0
-  randomSpawnMode: 0
+  randomSpawnMode: 1
   spawnSwapNotes: 0
   scoreText: {fileID: 1456002969}
   comboText: {fileID: 497129299}
