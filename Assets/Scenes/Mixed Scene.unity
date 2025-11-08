@@ -329,11 +329,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fee7e4dbbf90c4e95a55922829c9a1bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pattern: 0
   startAngle: 0
   totalArcAngle: 360
   speed: 4
-  angle: 180
 --- !u!114 &123382299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -487,6 +485,10 @@ MonoBehaviour:
   maxPoolSize: 100
   bulletPrefab: {fileID: 1650497433553459816, guid: 147a9e42a20f74fbbb83fb3630994462, type: 3}
   emitters:
+  - emitter: {fileID: 412561547}
+    beatsAfterPrevToActivate: 5
+  - emitter: {fileID: 1068750665}
+    beatsAfterPrevToActivate: 0
   - emitter: {fileID: 1849241050}
     beatsAfterPrevToActivate: 5
   - emitter: {fileID: 123382297}
@@ -495,10 +497,6 @@ MonoBehaviour:
     beatsAfterPrevToActivate: 5
   - emitter: {fileID: 1686701391}
     beatsAfterPrevToActivate: 5
-  - emitter: {fileID: 412561547}
-    beatsAfterPrevToActivate: 5
-  - emitter: {fileID: 1068750665}
-    beatsAfterPrevToActivate: 0
 --- !u!4 &257448155
 Transform:
   m_ObjectHideFlags: 0
@@ -668,11 +666,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fee7e4dbbf90c4e95a55922829c9a1bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pattern: 1
   startAngle: 0
-  totalArcAngle: 360
+  totalArcAngle: 0
   speed: 4
-  angle: 180
 --- !u!114 &412561550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -687,8 +683,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 1
   preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
-  numToEmitPerRound: 5
-  numRounds: 2
+  numToEmitPerRound: 1
+  numRounds: 3
   timeBetweenRounds: 3
   emitPerBeat: 1
 --- !u!212 &412561551
@@ -978,11 +974,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fee7e4dbbf90c4e95a55922829c9a1bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pattern: 1
-  startAngle: 0
-  totalArcAngle: 360
+  startAngle: 180
+  totalArcAngle: 0
   speed: 4
-  angle: 0
 --- !u!114 &1068750668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -997,8 +991,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 1
   preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
-  numToEmitPerRound: 5
-  numRounds: 2
+  numToEmitPerRound: 1
+  numRounds: 3
   timeBetweenRounds: 3
   emitPerBeat: 1
 --- !u!212 &1068750669
@@ -1929,11 +1923,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fee7e4dbbf90c4e95a55922829c9a1bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pattern: 0
   startAngle: 0
   totalArcAngle: 360
   speed: 4
-  angle: 180
 --- !u!114 &1686701393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2277,11 +2269,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fee7e4dbbf90c4e95a55922829c9a1bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pattern: 0
   startAngle: 0
   totalArcAngle: 360
   speed: 4
-  angle: 180
 --- !u!114 &1849241052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2628,18 +2618,6 @@ PrefabInstance:
       value: AreaDamage
       objectReference: {fileID: 0}
     - target: {fileID: 5751755656764304988, guid: 7c7312c474daa401d8eb7ffd4814edfc, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 5751755656764304988, guid: 7c7312c474daa401d8eb7ffd4814edfc, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5751755656764304988, guid: 7c7312c474daa401d8eb7ffd4814edfc, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5751755656764304988, guid: 7c7312c474daa401d8eb7ffd4814edfc, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.68
       objectReference: {fileID: 0}
@@ -2678,6 +2656,14 @@ PrefabInstance:
     - target: {fileID: 5751755656764304988, guid: 7c7312c474daa401d8eb7ffd4814edfc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 7003246842079932625, guid: 7c7312c474daa401d8eb7ffd4814edfc, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9079299085180037863, guid: 7c7312c474daa401d8eb7ffd4814edfc, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2841,11 +2827,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fee7e4dbbf90c4e95a55922829c9a1bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pattern: 0
   startAngle: 0
   totalArcAngle: 360
   speed: 4
-  angle: 180
 --- !u!1 &3646917666201783557
 GameObject:
   m_ObjectHideFlags: 0
