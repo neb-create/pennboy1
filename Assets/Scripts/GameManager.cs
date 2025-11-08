@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.Pool;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -106,9 +107,11 @@ public class GameManager : MonoBehaviour
     public int defaultPoolSize = 50;
     public int maxPoolSize = 100;
     [SerializeField] GameObject bulletPrefab;
+    [Header("int is number beats after prev one spawned or bullet hell began, whichever comes later")]
     public List<Pair> emitters = new List<Pair>();
     private int emitterIndex = 0;
     private float timePerBeat = 0.5f;
+    private float timeLastEmitterSetActive;
     private float bulletHellStartTime;
 
 
@@ -143,6 +146,13 @@ public class GameManager : MonoBehaviour
 
     void swapToRhythmGame()
     {
+        //clear bullet hell stuff
+        if (masterProjectilePool != null)
+        {
+            masterProjectilePool.Clear();
+            Debug.Log("clear pool");
+        }
+        ClearBulletHell();
         
         // Swap: 
         gamestate = GameState.BULLET;
@@ -199,6 +209,11 @@ public class GameManager : MonoBehaviour
             default:
                 NoteToSpawn = NotePrefabTap;
                 break;
+        }
+
+        if (NoteToSpawn == NotePrefabSlide)
+        {
+            return;
         }
         
         GameObject new_note = Instantiate(NoteToSpawn, new Vector3(0f,0f,0f), Quaternion.identity);
@@ -546,6 +561,25 @@ public class GameManager : MonoBehaviour
                         break;
                     case Beatmap.NoteInfo.SLIDE_NOTE:
                         //Debug.Log("SLIDE_NOTE_PLAYED");
+                        Debug.Log("SlideNote handle attempt ");
+                        float slideEndTime = float.Parse(noteInfos[currNote].extra_info[0]);
+                        KeyCode slideStartKey = (KeyCode)System.Enum.Parse(typeof(KeyCode), noteInfos[currNote].extra_info[1], true);
+                        KeyCode slideEndKey = (KeyCode)System.Enum.Parse(typeof(KeyCode), noteInfos[currNote].extra_info[2], true);
+
+                        float posX = float.Parse(noteInfos[currNote].extra_info[3]);
+                        float posY = float.Parse(noteInfos[currNote].extra_info[4]);
+                        float posZ = float.Parse(noteInfos[currNote].extra_info[5]);
+
+                        // Create the spawn position Vector3 from the parsed data
+                        Vector3 spawnPos = new Vector3(posX, posY, posZ);
+
+                        SpawnSlideNote(
+                            noteInfos[currNote].start_time,
+                            slideEndTime,
+                            slideStartKey,
+                            slideEndKey,
+                            spawnPos
+                        );
                         break;
                 }
                 currNote++;
@@ -577,6 +611,28 @@ public class GameManager : MonoBehaviour
 
         }
 
+    }
+
+    public void SpawnSlideNote(float startTime, float endTime, KeyCode startKey, KeyCode endKey, Vector3 spawnPosition)
+    {
+        Debug.Log("SlideNote spawn attempt " + startKey + " " + endKey);
+        GameObject slideNoteObj = Instantiate(NotePrefabSlide, spawnPosition, Quaternion.Euler(50f, 0.0f, 0.0f));
+
+        SlideNote slideNote = slideNoteObj.GetComponent<SlideNote>();
+        if (slideNote == null)
+        {
+            Debug.LogError("SlideNotePrefab does not have a SlideNote component!");
+            return;
+        }
+
+        slideNote.startTime = startTime;
+        slideNote.endTime = endTime;
+        slideNote.startKey = startKey;
+        slideNote.endKey = endKey;
+
+        slideNote.transform.position = spawnPosition;
+
+        //ActiveNotes.Add(slideNoteObj);
     }
 
     System.Collections.IEnumerator ComboAnimation()
@@ -679,7 +735,7 @@ public class GameManager : MonoBehaviour
         swapGameState();
 
         // player
-        player.GetComponent<Rigidbody>().WakeUp();   
+        player.GetComponent<Rigidbody>().WakeUp();
 
         // Todo... bullet hell setup..
         gameCamera.GetComponent<GameCamera>().TransitionToBulletHell();
@@ -695,6 +751,13 @@ public class GameManager : MonoBehaviour
         );
         bulletHellStartTime = Time.time; //TODO: i am just setting this to the time the bullet hell manager is activated
 
+    }
+    void ClearBulletHell()
+    {
+        foreach(BulletEmitter ae in GetComponentsInChildren<BulletEmitter>())
+        {
+            ae.gameObject.SetActive(false);
+        }
     }
     
     void UpdateBullet()
@@ -714,12 +777,15 @@ public class GameManager : MonoBehaviour
             {
                 p.emitter = Instantiate(PlaceholderDefaultEmitter);
                 p.emitter.SetActive(false);
+                timeLastEmitterSetActive = Time.time;
             }
 
-            if (Time.time >= bulletHellStartTime + p.beatToActivate * timePerBeat)
+            if (Time.time >= Math.Max(timeLastEmitterSetActive, bulletHellStartTime) + p.beatsAfterPrevToActivate * timePerBeat)
             {
                 p.emitter.SetActive(true);
+                Debug.Log("set active: " + emitterIndex);
                 emitterIndex++;
+                timeLastEmitterSetActive = Time.time;
                 if (emitterIndex == emitters.Count)
                 {
                     OnBulletHellComplete();
@@ -774,18 +840,21 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //initialize bullet hell variables
+        timeLastEmitterSetActive = Time.time;
+        emitterIndex = 0;
 
         // Rhythm game setup
         time_offset = 60f / (bpm * 2f) * 8f;
         instance = this;
         note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
-        noteInfos = Beatmap.LoadBeatmap("Beatmap");
+        noteInfos = Beatmap.LoadBeatmap("beatmapWithSlides");
         currNote = 0;
 
         string combo_inc_hex_color = "#B2ACFF";
         ColorUtility.TryParseHtmlString(combo_inc_hex_color, out combo_inc_color);
 
-        string combo_init_hex_color = "#FFFFFFFF";
+        string combo_init_hex_color = "rgba(255, 255, 255, 1)";
         ColorUtility.TryParseHtmlString(combo_init_hex_color, out combo_init_color);
 
         swapToRhythmGame();

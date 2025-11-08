@@ -50,7 +50,9 @@ public class BulletHellManager : MonoBehaviour
         //ex: 240 bpm, 3 min song = 720 beats and each emitter is released on one of those beats
         //will continuously set projectile emitters to active
         Pair p = emitters[emitterIndex];
-        if (Time.time >= bulletHellStartTime + p.beatToActivate * timePerBeat)
+        
+        //THIS CODE DOESNT WORK ANYMORE!! is deprecated
+        /*if (Time.time >= bulletHellStartTime + p.beatsAfterPrevToActivate * timePerBeat)
         {
             p.emitter.SetActive(true);
             emitterIndex++;
@@ -58,7 +60,7 @@ public class BulletHellManager : MonoBehaviour
             {
                 OnBulletHellComplete();
             }
-        }
+        }*/
 
     }
     void OnBulletHellComplete()

@@ -29,6 +29,13 @@ public class Projectile : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rend = GetComponent<Renderer>();
     }
+    void OnEnable()
+    {
+        dir = new Vector2(0, 0);
+        targetDir = new Vector2(0, 0);
+        elapsedTime = 0;
+        lockedOn = false;
+    }
    public void InitAttributes() //will be called by object pooling thing
     {
         if (preset != null)

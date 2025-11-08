@@ -4,5 +4,5 @@ using UnityEngine;
 public class Pair
 {
     public GameObject emitter;
-    public int beatToActivate;
+    public int beatsAfterPrevToActivate;
 }

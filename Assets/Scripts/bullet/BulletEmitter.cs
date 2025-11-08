@@ -15,6 +15,7 @@ public class BulletEmitter : MonoBehaviour
     [SerializeField] BulletAttributePreset preset;
     //[SerializeField] GameObject aoePrefab; //you don't need a prefab for aoe bc it's hard coded
     private GameManager manager;
+    [Header("if linear, only emit one per round! WILL BE SET IN SCRIPT")]
     [SerializeField] int numToEmitPerRound = 1;
     public int NumToEmitPerRound => numToEmitPerRound;
     [SerializeField] int numRounds = 5;
@@ -22,24 +23,29 @@ public class BulletEmitter : MonoBehaviour
     [Header("Time Between Rounds")]
     [SerializeField] float timeBetweenRounds = 2f; //in seconds
     [SerializeField] bool emitPerBeat;
-    [SerializeField] int bpm;
+    private int bpm;
     
     //private vars
     private int roundsEmitted;
     private float elapsedTime;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void OnEnable()
     {
+        roundsEmitted = 0;
         elapsedTime = timeBetweenRounds; //ensure that guaranteed to emit when update runs for first time
-        manager = GameManager.instance;
-
-        if (emitPerBeat) timeBetweenRounds = 60.0f / bpm;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (manager == null)
+        {
+            manager = GameManager.instance;
+            bpm = manager.bpm;
+            if (emitPerBeat) timeBetweenRounds = 60.0f / bpm;
+        }
+        
         elapsedTime += Time.deltaTime;
         if (elapsedTime >= timeBetweenRounds)
         {
@@ -47,7 +53,7 @@ public class BulletEmitter : MonoBehaviour
             elapsedTime = 0;
         }
 
-        if (roundsEmitted == numRounds) Destroy(this.gameObject);
+        if (roundsEmitted == numRounds) gameObject.SetActive(false);
     }
     void Emit()
     {
