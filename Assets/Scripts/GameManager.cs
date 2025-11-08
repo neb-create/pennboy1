@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.Pool;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -106,9 +107,11 @@ public class GameManager : MonoBehaviour
     public int defaultPoolSize = 50;
     public int maxPoolSize = 100;
     [SerializeField] GameObject bulletPrefab;
+    [Header("int is number beats after prev one spawned or bullet hell began, whichever comes later")]
     public List<Pair> emitters = new List<Pair>();
     private int emitterIndex = 0;
     private float timePerBeat = 0.5f;
+    private float timeLastEmitterSetActive;
     private float bulletHellStartTime;
 
 
@@ -143,13 +146,17 @@ public class GameManager : MonoBehaviour
 
     void swapToRhythmGame()
     {
+        //clear bullet hell stuff
+        if (masterProjectilePool != null)
+        {
+            masterProjectilePool.Clear();
+            Debug.Log("clear pool");
+        }
+        ClearBulletHell();
         
         // Swap: 
         gamestate = GameState.BULLET;
         swapGameState();
-
-        //clear bullet hell stuff
-        ClearBulletHell();
 
         // TODO: cool special effects
         gameCamera.GetComponent<GameCamera>().TransitionToRhythmGame();
@@ -770,12 +777,15 @@ public class GameManager : MonoBehaviour
             {
                 p.emitter = Instantiate(PlaceholderDefaultEmitter);
                 p.emitter.SetActive(false);
+                timeLastEmitterSetActive = Time.time;
             }
 
-            if (Time.time >= bulletHellStartTime + p.beatToActivate * timePerBeat)
+            if (Time.time >= Math.Max(timeLastEmitterSetActive, bulletHellStartTime) + p.beatsAfterPrevToActivate * timePerBeat)
             {
                 p.emitter.SetActive(true);
+                Debug.Log("set active: " + emitterIndex);
                 emitterIndex++;
+                timeLastEmitterSetActive = Time.time;
                 if (emitterIndex == emitters.Count)
                 {
                     OnBulletHellComplete();
@@ -830,6 +840,9 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //initialize bullet hell variables
+        timeLastEmitterSetActive = Time.time;
+        emitterIndex = 0;
 
         // Rhythm game setup
         time_offset = 60f / (bpm * 2f) * 8f;
@@ -841,7 +854,7 @@ public class GameManager : MonoBehaviour
         string combo_inc_hex_color = "#B2ACFF";
         ColorUtility.TryParseHtmlString(combo_inc_hex_color, out combo_inc_color);
 
-        string combo_init_hex_color = "#FFFFFFFF";
+        string combo_init_hex_color = "rgba(255, 255, 255, 1)";
         ColorUtility.TryParseHtmlString(combo_init_hex_color, out combo_init_color);
 
         swapToRhythmGame();

@@ -9,16 +9,12 @@ public class AreaDamage : MonoBehaviour
 
     [Header("General Attributes")]
     [SerializeField] private float damage;
-    [SerializeField] bool lifetimeInBeats;
-    private float lifetimeBeats;
+    [SerializeField] bool lifetimeInBeats = true;
+    private float lifetimeBeats = 0;
     [SerializeField] private float lifetime;
     private float elapsedTime;
     private float damageCooldown = 1f;
     private float lastDamageInstanceTime = -1;
-    void Start()
-    {
-        lifetimeBeats = lifetime * (60f / GameManager.instance.bpm);
-    }
 
     // Update is called once per frame
     void FixedUpdate()
@@ -27,6 +23,8 @@ public class AreaDamage : MonoBehaviour
     }
     void Update()
     {
+        if (lifetimeBeats == 0) lifetimeBeats = lifetime * (60f / GameManager.instance.bpm);
+        
         elapsedTime += Time.deltaTime;
         float effectiveLifetime = lifetime;
         if (lifetimeInBeats) effectiveLifetime = lifetimeBeats;
