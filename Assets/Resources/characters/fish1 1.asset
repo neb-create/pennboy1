@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: fish1 1
   m_EditorClassIdentifier: 
   characterName: o.o
-  characterImage: {fileID: 0}
+  characterImage: {fileID: -4234903660092006506, guid: c051b22bb45ec4213b6f2d0ae8b5ec2b, type: 3}
   rarity: 1
