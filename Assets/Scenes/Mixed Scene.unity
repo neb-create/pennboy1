@@ -755,7 +755,7 @@ MonoBehaviour:
   time_current: 0
   NotePrefabTap: {fileID: 8451768978859604752, guid: 0dcc6899da3e11140ad525c8929cbb07, type: 3}
   NotePrefabHold: {fileID: 8451768978859604752, guid: 7701a966a0635214f8d5ae732743b3ec, type: 3}
-  NotePrefabSlide: {fileID: 8451768978859604752, guid: acda00a3a4d30a544ae506aea9672b74, type: 3}
+  NotePrefabSlide: {fileID: 221500376483738073, guid: fe6a67bb9c69f6d4d99be9d37223956d, type: 3}
   NotePrefabSwap: {fileID: 8451768978859604752, guid: d65550880d7c13041be31dfcaa3e677f, type: 3}
   NoteMaterialSpace: {fileID: 2100000, guid: 4270c46495f92d649a807b311f4c15ee, type: 2}
   NoteTriggerPrefab: {fileID: 2093069400746597394, guid: 632cc8892ae9f924a9282f4ac434e35d, type: 3}
@@ -766,7 +766,7 @@ MonoBehaviour:
   player: {fileID: 2005414062}
   gameCamera: {fileID: 112312444}
   gamestate: 0
-  randomSpawnMode: 1
+  randomSpawnMode: 0
   spawnSwapNotes: 1
   scoreText: {fileID: 1456002969}
   comboText: {fileID: 497129299}
