@@ -93,10 +93,27 @@ public class Beatmap
                     prev_lane_f = 5;
                     break;
                 case NoteInfo.SLIDE_NOTE:
-                    float endtime = float.Parse(tokens[2]);
-                    char start_key = tokens[3][0];
-                    char end_key = tokens[4][0];
-                    notes.Add(new NoteInfo(NoteInfo.SLIDE_NOTE, time, new string[] {endtime + "", start_key + "", end_key + ""}));
+
+                    int endMinuteIndex = tokens[2].IndexOf(":");
+                    float endtime = int.Parse(tokens[2].Substring(0, endMinuteIndex)) * 60;
+                    endtime += float.Parse(tokens[2].Substring(endMinuteIndex + 1));
+
+                    string start_key = tokens[3];
+                    string end_key = tokens[4];
+                    string pos_x = tokens[5];
+                    string pos_y = tokens[6];
+                    string pos_z = tokens[7];
+
+                    // Add all 6 pieces of info to the extra_info array
+                    notes.Add(new NoteInfo(NoteInfo.SLIDE_NOTE, time, new string[] {
+                        endtime.ToString(),
+                        start_key,
+                        end_key,
+                        pos_x,
+                        pos_y,
+                        pos_z
+                    }));
+                    Debug.Log("SlideNote read attempt ");
                     break;
                 default:
                     Debug.Log("WARNING: Invalid Tile ID");

@@ -203,6 +203,11 @@ public class GameManager : MonoBehaviour
                 NoteToSpawn = NotePrefabTap;
                 break;
         }
+
+        if (NoteToSpawn == NotePrefabSlide)
+        {
+            return;
+        }
         
         GameObject new_note = Instantiate(NoteToSpawn, new Vector3(0f,0f,0f), Quaternion.identity);
         new_note.GetComponent<Note3D>().key = key;
@@ -549,6 +554,25 @@ public class GameManager : MonoBehaviour
                         break;
                     case Beatmap.NoteInfo.SLIDE_NOTE:
                         //Debug.Log("SLIDE_NOTE_PLAYED");
+                        Debug.Log("SlideNote handle attempt ");
+                        float slideEndTime = float.Parse(noteInfos[currNote].extra_info[0]);
+                        KeyCode slideStartKey = (KeyCode)System.Enum.Parse(typeof(KeyCode), noteInfos[currNote].extra_info[1], true);
+                        KeyCode slideEndKey = (KeyCode)System.Enum.Parse(typeof(KeyCode), noteInfos[currNote].extra_info[2], true);
+
+                        float posX = float.Parse(noteInfos[currNote].extra_info[3]);
+                        float posY = float.Parse(noteInfos[currNote].extra_info[4]);
+                        float posZ = float.Parse(noteInfos[currNote].extra_info[5]);
+
+                        // Create the spawn position Vector3 from the parsed data
+                        Vector3 spawnPos = new Vector3(posX, posY, posZ);
+
+                        SpawnSlideNote(
+                            noteInfos[currNote].start_time,
+                            slideEndTime,
+                            slideStartKey,
+                            slideEndKey,
+                            spawnPos
+                        );
                         break;
                 }
                 currNote++;
@@ -580,6 +604,28 @@ public class GameManager : MonoBehaviour
 
         }
 
+    }
+
+    public void SpawnSlideNote(float startTime, float endTime, KeyCode startKey, KeyCode endKey, Vector3 spawnPosition)
+    {
+        Debug.Log("SlideNote spawn attempt " + startKey + " " + endKey);
+        GameObject slideNoteObj = Instantiate(NotePrefabSlide, spawnPosition, Quaternion.Euler(50f, 0.0f, 0.0f));
+
+        SlideNote slideNote = slideNoteObj.GetComponent<SlideNote>();
+        if (slideNote == null)
+        {
+            Debug.LogError("SlideNotePrefab does not have a SlideNote component!");
+            return;
+        }
+
+        slideNote.startTime = startTime;
+        slideNote.endTime = endTime;
+        slideNote.startKey = startKey;
+        slideNote.endKey = endKey;
+
+        slideNote.transform.position = spawnPosition;
+
+        //ActiveNotes.Add(slideNoteObj);
     }
 
     System.Collections.IEnumerator ComboAnimation()
@@ -789,7 +835,7 @@ public class GameManager : MonoBehaviour
         time_offset = 60f / (bpm * 2f) * 8f;
         instance = this;
         note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
-        noteInfos = Beatmap.LoadBeatmap("Beatmap");
+        noteInfos = Beatmap.LoadBeatmap("beatmapWithSlides");
         currNote = 0;
 
         string combo_inc_hex_color = "#B2ACFF";
