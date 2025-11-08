@@ -1,22 +1,22 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections; 
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 public class GachaManager : MonoBehaviour
 {
     [Header("UI References")]
+    public Image characterImage;
+    public TextMeshProUGUI characterName;
     public Button draw1Button;
-
     public Button draw10Button;
 
     public GameObject resultPanel;
-    public Image characterImage;
-    public Text characterName;
     public ParticleSystem flashEffect;
 
     [Header("Character Pool")]
-    public List<CharacterData> characters = new List<CharacterData>();
+    public List<CharacterDataSO> characters;
 
     [Header("Rarity Rates (0~1 sum = 1)")]
     public float rRate = 0.75f;
@@ -31,7 +31,7 @@ public class GachaManager : MonoBehaviour
         draw10Button.onClick.AddListener(() => DrawCharacter(10));
     }
 
-    IEnumerator DelayShow(CharacterData selected, float delay)
+    IEnumerator DelayShow(CharacterDataSO selected, float delay)
     {
         yield return new WaitForSeconds(delay);
         ShowResult(selected);
@@ -45,7 +45,7 @@ public class GachaManager : MonoBehaviour
 
         if (count == 1)
         {
-            CharacterData selected = GetRandomCharacter();
+            CharacterDataSO selected = GetRandomCharacter();
             StartCoroutine(DelayShow(selected, 1.2f));
             Debug.Log($"Character: {selected.characterName}({selected.rarity})");
         }
@@ -60,14 +60,14 @@ public class GachaManager : MonoBehaviour
     {
         for (int i = 0; i < 10; i++)
             {
-                CharacterData selected = GetRandomCharacter();
+                CharacterDataSO selected = GetRandomCharacter();
                 StartCoroutine(DelayShow(selected, 1.2f));
                 yield return new WaitForSeconds(0.6f);
             }
             Debug.Log("Pull x10 completed!");
     }
 
-    void ShowResult(CharacterData selected)
+    void ShowResult(CharacterDataSO selected)
     {
         resultPanel.SetActive(true);
         characterImage.sprite = selected.characterImage;
@@ -75,7 +75,7 @@ public class GachaManager : MonoBehaviour
         flashEffect.Play();
     }
 
-    CharacterData GetRandomCharacter()
+    CharacterDataSO GetRandomCharacter()
     {
         float roll = Random.value;
         Rarity pickedRarity = Rarity.R;
@@ -83,7 +83,7 @@ public class GachaManager : MonoBehaviour
         if (roll < ssrRate) pickedRarity = Rarity.SSR;
         else if (roll < ssrRate + srRate) pickedRarity = Rarity.SR;
 
-        List<CharacterData> pool = characters.FindAll(c => c.rarity == pickedRarity);
+        List<CharacterDataSO> pool = characters.FindAll(c => c.rarity == pickedRarity);
         return pool[Random.Range(0, pool.Count)];
 
     }

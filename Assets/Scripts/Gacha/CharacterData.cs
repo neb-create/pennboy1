@@ -8,4 +8,6 @@ public class CharacterData
 
 }
 
-public enum Rarity { R, SR, SSR}
+public enum Rarity { R, SR, SSR }
+
+  

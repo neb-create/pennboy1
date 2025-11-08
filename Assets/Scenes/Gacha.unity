@@ -2318,12 +2318,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b55098976cfe406092951ac3c6f0187, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  characterImage: {fileID: 502941367}
+  characterName: {fileID: 0}
   draw1Button: {fileID: 1436447340}
   draw10Button: {fileID: 1161682542}
   resultPanel: {fileID: 771641429}
-  characterImage: {fileID: 502941367}
-  characterName: {fileID: 0}
-  flashEffect: {fileID: 0}
+  flashEffect: {fileID: 7361575044114846247, guid: fa0f1b484ffc94ae0873eca08936dd29, type: 3}
+  characters:
+  - {fileID: 11400000, guid: 8b0688f14e36f419fb952c8ec0a31eb0, type: 2}
+  - {fileID: 11400000, guid: 8b6c4fd89254449d09e48e865821ae16, type: 2}
+  - {fileID: 11400000, guid: f9c9859bcb1d745a4ae24e4b068b2515, type: 2}
+  - {fileID: 11400000, guid: cff90ca07215440d4bb3c462bf4ac172, type: 2}
+  - {fileID: 11400000, guid: 66474765e70fa458e864b032dabf6ac3, type: 2}
   rRate: 0.75
   srRate: 0.2
   ssrRate: 0.05
