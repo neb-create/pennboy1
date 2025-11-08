@@ -94,7 +94,7 @@ public class Beatmap
                     break;
                 case NoteInfo.SLIDE_NOTE:
 
-                    int endMinuteIndex = tokens[2].IndexOf(":");
+                    int endMinuteIndex = tokens[2].IndexOf(":");
                     float endtime = int.Parse(tokens[2].Substring(0, endMinuteIndex)) * 60;
                     endtime += float.Parse(tokens[2].Substring(endMinuteIndex + 1));
 
