@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.Pool;
 using UnityEngine.UI;
 using System;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -97,6 +98,7 @@ public class GameManager : MonoBehaviour
     private int currNote;
     public bool randomSpawnMode = true;
     public bool spawnSwapNotes = true;
+    public bool finishedSong = false;
 
     [Header("UI/VFX")]
     // UI Text
@@ -104,6 +106,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI comboText;
     [SerializeField] private TextMeshProUGUI scoreTypeText;
     [SerializeField] private GameObject comboVfx;
+    [SerializeField] private TextMeshProUGUI perfectText;
+    [SerializeField] private TextMeshProUGUI greatText;
+    [SerializeField] private TextMeshProUGUI badText;
+    [SerializeField] private TextMeshProUGUI missText;
+    [SerializeField] private TextMeshProUGUI finalScoreText;
+    [SerializeField] private TextMeshProUGUI maxComboText;
+    [SerializeField] private TextMeshProUGUI comboTextStatic;
     private Color combo_inc_color;
     private Color combo_init_color;
 
@@ -455,8 +464,34 @@ public class GameManager : MonoBehaviour
 
         if (currNote == noteInfos.Count)
         {
+            currNote++;
+        }
+
+        if (time_current > GetComponent<AudioSource>().clip.length / 8)
+        {
             Debug.Log("Finished Song");
             currNote++;
+            comboVfx.SetActive(false);
+            finishedSong = true;
+            keyToObjMap.Clear();
+            for (int i = player.transform.childCount - 1; i >= 0; i--)
+            {
+                DestroyImmediate(player.transform.GetChild(i).gameObject);
+            }
+        }
+
+        if (finishedSong)
+        {
+            scoreText.text = "";
+            comboText.text = "";
+            comboTextStatic.text = "";
+            perfectText.text    = "PERFECT:   " + perfect_count;
+            greatText.text      = "GREAT:     " + great_count;
+            badText.text        = "BAD:       " + bad_count;
+            missText.text       = "MISS:      " + miss_count;
+            finalScoreText.text = "SCORE:     " + score;
+            maxComboText.text   = "MAX COMBO: " + max_combo + "\nPress space to go Menu!";
+            return;
         }
 
         // Spawn Notes
@@ -700,14 +735,23 @@ public class GameManager : MonoBehaviour
         // Handle Player Input
         HandleInput();
         
+        if (finishedSong)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                SceneManager.LoadScene("TitleScreen");
+            }
+            return;
+        }
         
 
-        scoreText.text = "SCORE: " + score;
         
         if (int.Parse(comboText.text) < current_combo)
         {
             StartCoroutine(ComboAnimation());
         }
+
+        scoreText.text = "SCORE: " + score;
         comboText.text = current_combo + "";
 
         if (current_combo > 49)
@@ -870,6 +914,13 @@ public class GameManager : MonoBehaviour
         note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
         noteInfos = Beatmap.LoadBeatmap("beatmap");
         currNote = 0;
+
+        perfectText.text = "";
+        greatText.text = "";
+        badText.text = "";
+        missText.text = "";
+        finalScoreText.text = "";
+        maxComboText.text = "";
 
         string combo_inc_hex_color = "#B2ACFF";
         ColorUtility.TryParseHtmlString(combo_inc_hex_color, out combo_inc_color);
