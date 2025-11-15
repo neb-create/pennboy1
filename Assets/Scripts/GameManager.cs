@@ -554,6 +554,8 @@ public class GameManager : MonoBehaviour
                         break;
                     case Beatmap.NoteInfo.HOLD_NOTE:
                         //Debug.Log("HOLD_NOTE_PLAYED");
+                        Debug.Log("test: " + noteInfos[currNote].extra_info[1]);
+                        SpawnNote(LaneIDToKey(int.Parse(noteInfos[currNote].extra_info[0])), noteInfos[currNote].start_time, NoteType.HOLD, float.Parse(noteInfos[currNote].extra_info[1]) - noteInfos[currNote].start_time);
                         break;
                     case Beatmap.NoteInfo.SPACE_NOTE:
                         //Debug.Log("SPACE_NOTE_PLAYED");
@@ -848,7 +850,7 @@ public class GameManager : MonoBehaviour
         time_offset = 60f / (bpm * 2f) * 8f;
         instance = this;
         note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
-        noteInfos = Beatmap.LoadBeatmap("beatmapWithSlides");
+        noteInfos = Beatmap.LoadBeatmap("beatmap");
         currNote = 0;
 
         string combo_inc_hex_color = "#B2ACFF";

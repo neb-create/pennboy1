@@ -7,7 +7,7 @@ public class Beatmap
 
     // <note_id> <min:sec.ms> <note specific inputs>
     // 0 <min:sec.ms> <lane (1-4)>
-    // 1 <min:sec.ms> <lane (1-4)> <length min:sec.ms>
+    // 1 <min:sec.ms> <lane (1-5)> <length min:sec.ms>
     // 2 <min:sec.ms>
     // 3 <min:sec.ms> <endtime seconds> <start_key> <end_key>
     public static List<NoteInfo> LoadBeatmap(string filename)
@@ -48,14 +48,14 @@ public class Beatmap
             int prev_time = (int)(time / (60f / BPM));
             int next_time = prev_time + 1;
 
-            // if (Mathf.Abs(time - (prev_time * (60f / BPM))) > Mathf.Abs(time - (next_time * (60f / BPM))))
-            // {
-            //     time = next_time * (60f / BPM);
-            // }
-            // else
-            // {
-            //     time = prev_time * (60f / BPM);
-            // }
+            if (Mathf.Abs(time - (prev_time * (60f / BPM))) > Mathf.Abs(time - (next_time * (60f / BPM))))
+            {
+                time = next_time * (60f / BPM);
+            }
+            else
+            {
+                time = prev_time * (60f / BPM);
+            }
 
             //Debug.Log(time);
 
@@ -77,9 +77,12 @@ public class Beatmap
                 case NoteInfo.HOLD_NOTE:
                     lane = int.Parse(tokens[2]);
                     string length = tokens[3];
+                    int ind = length.IndexOf(":");
+                    float len = (int.Parse(length.Substring(0, ind)) * 60) + global_offset;
+                    len = len + float.Parse(length.Substring(ind + 1));
                     if (!(prev_time_f == time && prev_lane_f == lane))
                     {
-                        notes.Add(new NoteInfo(NoteInfo.HOLD_NOTE, time, new string[] { lane + "", length }));
+                        notes.Add(new NoteInfo(NoteInfo.HOLD_NOTE, time, new string[] { lane + "", len+"" }));
                     }
                     prev_time_f = time;
                     prev_lane_f = lane;

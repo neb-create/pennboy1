@@ -19,7 +19,7 @@ public class RhythmRecorder : MonoBehaviour
     const int I = 2;
     const int O = 3;
     const int SPACE = 4;
-    const float MAX_BASIC_DELTA = 0.4f;
+    const float MAX_BASIC_DELTA = 0.3f;
     const float RECORD_PERCENT = 1.0f;
 
     public float global_offset = -1.5f;
@@ -27,7 +27,7 @@ public class RhythmRecorder : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        startTimes = new float[4];
+        startTimes = new float[5];
         data = "Global Offset:\n" + global_offset + "\nNote Data:\n";
         Write();
         GetComponent<AudioSource>().Stop();
@@ -83,7 +83,7 @@ public class RhythmRecorder : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            data += "2 " + FormatTime(curr_time) + "\n";
+            startTimes[SPACE] = curr_time;
         }
 
         if (Input.GetKeyUp(KeyCode.W))
@@ -102,6 +102,10 @@ public class RhythmRecorder : MonoBehaviour
         {
             ProcessKey(O);
         }
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            ProcessKey(SPACE);
+        }
     }
 
     string FormatTime(float time)
@@ -117,7 +121,13 @@ public class RhythmRecorder : MonoBehaviour
         float keyDelta = curr_time - startTimes[keycode];
         if (keyDelta < MAX_BASIC_DELTA)
         {
-            data += "0 " + FormatTime(startTimes[keycode]) + " " + (keycode + 1) + "\n";
+            if (keycode == 4)
+            {
+                data += "2 " + FormatTime(startTimes[keycode]) + "\n";
+            } else
+            {
+                data += "0 " + FormatTime(startTimes[keycode]) + " " + (keycode + 1) + "\n";
+            }
         } else
         {
             data += "1 " + FormatTime(startTimes[keycode]) + " " + (keycode + 1) + " " + FormatTime(curr_time) + "\n";
