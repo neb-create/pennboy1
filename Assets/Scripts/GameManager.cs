@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.Pool;
+using UnityEngine.UI;
 using System;
 
 public class GameManager : MonoBehaviour
@@ -40,7 +41,7 @@ public class GameManager : MonoBehaviour
     float note_z_despawn = -6.0f;
     float note_prespawn_time;
     public float time_current = -2.0f;
-    float time_offset = 0.0f;
+    public float time_offset = 0.0f;
     float time_nextnote = 5.0f;
 
     // Input state var - 0 (space) 1 2 (left) 3 4 (right)
@@ -67,6 +68,11 @@ public class GameManager : MonoBehaviour
     public GameObject slideVFXPrefab;
 
     [Header("Config")]
+    public Slider timeline;
+    public TMP_Text playPauseLabel;
+    bool paused = true;
+    public AudioSource audioSource;
+    public Transform editorContainer;
     // Player Object
     public GameObject player;
     public GameObject gameCamera;
@@ -454,7 +460,6 @@ public class GameManager : MonoBehaviour
         }
 
         // Spawn Notes
-        time_current += Time.deltaTime;
         if (randomSpawnMode) {
 
             // Random Spawn Mode
@@ -696,11 +701,6 @@ public class GameManager : MonoBehaviour
         HandleInput();
         
         
-        if (time_current > 0.0f && !GetComponent<AudioSource>().isPlaying)
-        {
-            GetComponent<AudioSource>().Play();
-            time_current = time_offset;
-        }
 
         scoreText.text = "SCORE: " + score;
         
@@ -835,6 +835,18 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        
+        // Pre update
+        if (Input.GetKeyDown(KeyCode.BackQuote))
+        {
+            ToggleEditorVisibility();
+        }
+        if (!paused) {
+            time_current = audioSource.time + time_offset;
+        }
+        timeline.SetValueWithoutNotify(audioSource.time);
+
+        // Main update
         if (gamestate == GameState.RHYTHM)
         {
             UpdateRhythm();
@@ -854,6 +866,7 @@ public class GameManager : MonoBehaviour
 
         // Rhythm game setup
         time_offset = 60f / (bpm * 2f) * 8f;
+        time_offset = 60f / (bpm * 2f) * 8f;
         instance = this;
         note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
         noteInfos = Beatmap.LoadBeatmap("beatmap");
@@ -865,7 +878,103 @@ public class GameManager : MonoBehaviour
         string combo_init_hex_color = "rgba(255, 255, 255, 1)";
         ColorUtility.TryParseHtmlString(combo_init_hex_color, out combo_init_color);
 
+        timeline.minValue = 0f;
+        timeline.maxValue = audioSource.clip.length;
+        SetAudioTime(0f);
+        PlayAudio();
+        TogglePlayPause();
+        TogglePlayPause();
+
         swapToRhythmGame();
 
     }
+
+    public void TogglePlayPause()
+    {
+        SetAudioTime(timeline.value);
+        if (!paused)
+        {
+            paused = true;
+            audioSource.Pause();
+        }
+        else
+        {
+            paused = false;
+            audioSource.Play();
+        }
+        UpdatePlayPauseLabel();
+    }
+
+    public void StopAudio()
+    {
+        audioSource.Stop();
+        SetAudioTime(0f);
+        paused = true;
+        UpdatePlayPauseLabel();
+    }
+    public void PlayAudio()
+    {
+        audioSource.Play();
+        paused = false;
+        UpdatePlayPauseLabel();
+    }
+
+    public void SetAudioTime(float time)
+    {
+        time = Mathf.Clamp(time, 0f, audioSource.clip.length);
+        audioSource.time = time;
+        time_current = time + time_offset;
+        timeline.SetValueWithoutNotify(time);
+    }
+    public void SetAudioTimeFromSlider()
+    {
+        SetAudioTime(timeline.value);
+
+        UpdateBeatMapIndex();
+    }
+
+    public void UpdateBeatMapIndex()
+    {
+        // clear prev notes
+        for (int i = ActiveNotes.Count - 1; i >= 0; i--)
+        {
+            DestroyImmediate(ActiveNotes[i]);
+        }
+        // beatmap note
+        currNote = 0;
+        while (currNote < noteInfos.Count && time_current >= noteInfos[currNote].start_time)
+        {
+            currNote++;
+        }
+        // note
+        time_nextnote = 0.0f;
+        while (time_nextnote < time_current)
+        {
+            time_nextnote += 60.0f / bpm;
+        }
+    }
+
+    public void SaveBeatMap()
+    {
+        bool wasPlaying = audioSource.isPlaying;
+        if (wasPlaying)
+            audioSource.Pause();
+
+        string path = Application.persistentDataPath + "/audio_time.txt";
+        System.IO.File.WriteAllText(path, audioSource.time.ToString());
+        Debug.Log("Saved at: " + path);
+
+        if (wasPlaying)
+            audioSource.Play();
+    }
+    
+    void UpdatePlayPauseLabel()
+    {
+        playPauseLabel.text = paused ? "||" : ">";
+    }
+    public void ToggleEditorVisibility()
+    {
+        editorContainer.gameObject.SetActive(!editorContainer.gameObject.activeSelf);
+    }
+
 }
