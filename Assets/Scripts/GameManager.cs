@@ -865,8 +865,7 @@ public class GameManager : MonoBehaviour
         emitterIndex = 0;
 
         // Rhythm game setup
-        time_offset = 60f / (bpm * 2f) * 8f;
-        time_offset = 60f / (bpm * 2f) * 8f;
+        time_offset = 0.42f;
         instance = this;
         note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
         noteInfos = Beatmap.LoadBeatmap("beatmap");
@@ -935,11 +934,13 @@ public class GameManager : MonoBehaviour
 
     public void UpdateBeatMapIndex()
     {
+        
         // clear prev notes
         for (int i = ActiveNotes.Count - 1; i >= 0; i--)
         {
             DestroyImmediate(ActiveNotes[i]);
         }
+        ActiveNotes.Clear();
         // beatmap note
         currNote = 0;
         while (currNote < noteInfos.Count && time_current >= noteInfos[currNote].start_time)

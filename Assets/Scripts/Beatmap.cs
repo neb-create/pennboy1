@@ -48,14 +48,14 @@ public class Beatmap
             int prev_time = (int)(time / (60f / BPM));
             int next_time = prev_time + 1;
 
-            if (Mathf.Abs(time - (prev_time * (60f / BPM))) > Mathf.Abs(time - (next_time * (60f / BPM))))
-            {
-                time = next_time * (60f / BPM);
-            }
-            else
-            {
-                time = prev_time * (60f / BPM);
-            }
+            // if (Mathf.Abs(time - (prev_time * (60f / BPM))) > Mathf.Abs(time - (next_time * (60f / BPM))))
+            // {
+            //     time = next_time * (60f / BPM);
+            // }
+            // else
+            // {
+            //     time = prev_time * (60f / BPM);
+            // }
 
             //Debug.Log(time);
 
