@@ -778,6 +778,7 @@ public class GameManager : MonoBehaviour
                 p.emitter = Instantiate(PlaceholderDefaultEmitter);
                 p.emitter.SetActive(false);
                 timeLastEmitterSetActive = Time.time;
+                Debug.Log("created default emitter");
             }
 
             if (Time.time >= Math.Max(timeLastEmitterSetActive, bulletHellStartTime) + p.beatsAfterPrevToActivate * timePerBeat)
@@ -786,9 +787,14 @@ public class GameManager : MonoBehaviour
                 Debug.Log("set active: " + emitterIndex);
                 emitterIndex++;
                 timeLastEmitterSetActive = Time.time;
-                if (emitterIndex == emitters.Count)
+                if(p.emitter.GetComponent<BulletEmitter>().GetEmitType() == BulletEmitter.EmitType.stopFlag)
                 {
                     OnBulletHellComplete();
+                    Debug.Log("reached stop flag");
+                }else if (emitterIndex == emitters.Count)
+                {
+                    OnBulletHellComplete();
+                    Debug.Log("reahced the end w/o reaching a stop flag emitter which should NOT happen");
                 }
             }
         }
@@ -802,7 +808,7 @@ public class GameManager : MonoBehaviour
 
     void OnBulletHellComplete()
     {
-        emitterIndex = 0;
+        if(emitterIndex >= emitters.Count) emitterIndex = 0;
         swapToRhythmFlag = true;
         //gameObject.SetActive(false);
         //TODO something (placeholder^^)

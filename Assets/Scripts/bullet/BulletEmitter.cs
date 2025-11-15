@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class BulletEmitter : MonoBehaviour
 {
-    private enum EmitType
+    public enum EmitType
     {
-        aoe, projectile
+        aoe, projectile, stopFlag
     }
     [Header("Emit Type")]
     [SerializeField] EmitType type;
@@ -23,6 +23,7 @@ public class BulletEmitter : MonoBehaviour
     [Header("Time Between Rounds")]
     [SerializeField] float timeBetweenRounds = 2f; //in seconds
     [SerializeField] bool emitPerBeat;
+    [SerializeField] float beatsBetweenRounds = 2f; //in beats, only use if emit per beat checked
     private int bpm;
     
     //private vars
@@ -39,21 +40,24 @@ public class BulletEmitter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (manager == null)
+        if (type != EmitType.stopFlag)
         {
-            manager = GameManager.instance;
-            bpm = manager.bpm;
-            if (emitPerBeat) timeBetweenRounds = 60.0f / bpm;
-        }
-        
-        elapsedTime += Time.deltaTime;
-        if (elapsedTime >= timeBetweenRounds)
-        {
-            Emit();
-            elapsedTime = 0;
-        }
+            if (manager == null)
+            {
+                manager = GameManager.instance;
+                bpm = manager.bpm;
+                if (emitPerBeat) timeBetweenRounds = beatsBetweenRounds*(60.0f / bpm);
+            }
 
-        if (roundsEmitted == numRounds) gameObject.SetActive(false);
+            elapsedTime += Time.deltaTime;
+            if (elapsedTime >= timeBetweenRounds)
+            {
+                Emit();
+                elapsedTime = 0;
+            }
+
+            if (roundsEmitted == numRounds) gameObject.SetActive(false);
+        }
     }
     void Emit()
     {
@@ -81,5 +85,9 @@ public class BulletEmitter : MonoBehaviour
                 tmp.GetComponent<Projectile>().SetVelocity(v);
             }
         }
+    }
+    public EmitType GetEmitType()
+    {
+        return type;
     }
 }

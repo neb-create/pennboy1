@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -15,7 +16,21 @@ public class AreaDamage : MonoBehaviour
     private float elapsedTime;
     private float damageCooldown = 1f;
     private float lastDamageInstanceTime = -1;
+    private bool canDealDamage = false;
+    private float timeBeforeCanDealDamage = 1f;
+    private Collider col;
+    private MeshRenderer mr;
 
+    void OnEnable()
+    {
+        elapsedTime = 0;
+        canDealDamage = false;
+        col = GetComponent<Collider>();
+        mr = GetComponent<MeshRenderer>();
+
+        col.enabled = false;
+        mr.enabled = false;
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -23,15 +38,26 @@ public class AreaDamage : MonoBehaviour
     }
     void Update()
     {
-        if (lifetimeBeats == 0) lifetimeBeats = lifetime * (60f / GameManager.instance.bpm);
-        
         elapsedTime += Time.deltaTime;
-        float effectiveLifetime = lifetime;
-        if (lifetimeInBeats) effectiveLifetime = lifetimeBeats;
-        if (elapsedTime > effectiveLifetime)
+        if (!canDealDamage)
         {
-            gameObject.SetActive(false);
-            elapsedTime = 0;
+            if (elapsedTime >= timeBeforeCanDealDamage)
+            {
+                canDealDamage = true;
+                col.enabled = true;
+                mr.enabled = true;
+            }
+        } else {
+            if (lifetimeBeats == 0) lifetimeBeats = lifetime * (60f / GameManager.instance.bpm);
+        
+            float effectiveLifetime = lifetime;
+            if (lifetimeInBeats) effectiveLifetime = lifetimeBeats;
+            if (elapsedTime - timeBeforeCanDealDamage > effectiveLifetime)
+            {
+                gameObject.SetActive(false);
+                elapsedTime = 0;
+                canDealDamage = false;
+            }
         }
     }
 
