@@ -215,3 +215,4 @@ MonoBehaviour:
   targetObject: {fileID: 0}
   time: 0
   triggered: 0
+  id: 0

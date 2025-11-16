@@ -5,7 +5,7 @@ using TMPro;
 using System.Diagnostics;
 
 
-public class SlideNote : MonoBehaviour
+public class SlideNote : Note3D
 {
     [SerializeField] public float startTime;
     [SerializeField] public float endTime;
@@ -432,5 +432,10 @@ public class SlideNote : MonoBehaviour
             else
                 transform.position += dirSign * (new Vector3(1.0f, 0.0f, 0.0f)) * Time.deltaTime * 200.0f;
         }
+    }
+
+    public override GameManager.NoteType GetNoteType()
+    {
+        return GameManager.NoteType.SLIDE;
     }
 }

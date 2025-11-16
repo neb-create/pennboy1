@@ -6,7 +6,10 @@ public class SwapNote3D : Note3D
     {
         return time;
     }
-    
+    public override GameManager.NoteType GetNoteType()
+    {
+        return GameManager.NoteType.SWAP;
+    }
     public override void UpdatePosition(float time_current, float note_speed)
     {
         

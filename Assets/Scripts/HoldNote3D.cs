@@ -11,6 +11,11 @@ public class HoldNote3D : Note3D
     {
         return time_end;
     }
+
+    public override GameManager.NoteType GetNoteType()
+    {
+        return GameManager.NoteType.HOLD;
+    }
     
     public override float GetDistance(float t, KeyCode k)
     {

@@ -9,6 +9,9 @@ public class Note3D : MonoBehaviour
     public float time;
     public bool triggered;
 
+    // Note ID for editor
+    public int id;
+
     public void Trigger() {
         triggered = true;
     }
@@ -33,6 +36,11 @@ public class Note3D : MonoBehaviour
 
         transform.position = desired_pos + t * note_direction * note_speed;
 
+    }
+
+    public virtual GameManager.NoteType GetNoteType()
+    {
+        return GameManager.NoteType.TAP;
     }
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created

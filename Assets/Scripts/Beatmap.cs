@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 public class Beatmap
 {
-    const int BPM = 174 * 2;
 
     // <note_id> <min:sec.ms> <note specific inputs>
     // 0 <min:sec.ms> <lane (1-4)>
@@ -45,17 +44,20 @@ public class Beatmap
             float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60 + global_offset;
             time += float.Parse(tokens[1].Substring(minuteIndex + 1));
 
-            int prev_time = (int)(time / (60f / BPM));
+
+            // snapping
+            float SNAP = 60f / GameManager.instance.bpm / 8.0f;
+            int prev_time = (int)(time / SNAP);
             int next_time = prev_time + 1;
 
-            // if (Mathf.Abs(time - (prev_time * (60f / BPM))) > Mathf.Abs(time - (next_time * (60f / BPM))))
-            // {
-            //     time = next_time * (60f / BPM);
-            // }
-            // else
-            // {
-            //     time = prev_time * (60f / BPM);
-            // }
+            if (Mathf.Abs(time - (prev_time * SNAP)) > Mathf.Abs(time - (next_time * SNAP)))
+            {
+                time = next_time * SNAP;
+            }
+            else
+            {
+                time = prev_time * SNAP;
+            }
 
             //Debug.Log(time);
 

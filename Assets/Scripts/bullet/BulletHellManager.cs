@@ -13,7 +13,6 @@ public class BulletHellManager : MonoBehaviour
     public List<Pair> emitters = new List<Pair>();
     private int emitterIndex = 0;
     //private int bpm = 384;
-    private float timePerBeat = 0.5f;
     private float bulletHellStartTime;
 
     void Awake()
