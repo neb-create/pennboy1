@@ -20,6 +20,10 @@ public class Note3D : MonoBehaviour
     {
         return time;
     }
+    public virtual bool IsDecoration()
+    {
+        return false;
+    }
     public virtual float GetDistance(float t, KeyCode k)
     {
         if (triggered) return float.MaxValue;

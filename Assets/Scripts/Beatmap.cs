@@ -80,7 +80,7 @@ public class Beatmap
                     lane = int.Parse(tokens[2]);
                     string length = tokens[3];
                     int ind = length.IndexOf(":");
-                    float len = (int.Parse(length.Substring(0, ind)) * 60) + global_offset;
+                    float len = int.Parse(length.Substring(0, ind)) * 60;
                     len = len + float.Parse(length.Substring(ind + 1));
                     if (!(prev_time_f == time && prev_lane_f == lane))
                     {
@@ -93,6 +93,14 @@ public class Beatmap
                     if (!(prev_time_f == time && prev_lane_f == 5))
                     {
                         notes.Add(new NoteInfo(NoteInfo.SPACE_NOTE, time));
+                    }
+                    prev_time_f = time;
+                    prev_lane_f = 5;
+                    break;
+                case NoteInfo.SWAP_NOTE:
+                    if (!(prev_time_f == time && prev_lane_f == 5))
+                    {
+                        notes.Add(new NoteInfo(NoteInfo.SWAP_NOTE, time));
                     }
                     prev_time_f = time;
                     prev_lane_f = 5;
@@ -134,7 +142,8 @@ public class Beatmap
         public const int BASIC_NOTE = 0;
         public const int HOLD_NOTE = 1;
         public const int SPACE_NOTE = 2;
-        public const  int SLIDE_NOTE = 3;
+        public const int SLIDE_NOTE = 3;
+        public const int SWAP_NOTE = 4;
         public int note_type;
         public float start_time;
         public string[] extra_info;

@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.Pool;
 using UnityEngine.UI;
 using System;
+using System.IO;
 using UnityEngine.SceneManagement;
 using System.Linq;
 
@@ -38,13 +39,17 @@ public class GameManager : MonoBehaviour
     List<GameObject> ActiveNotes = new List<GameObject>();
     Dictionary<KeyCode, GameObject> keyToObjMap = new Dictionary<KeyCode, GameObject>();
     public float note_speed = 9f;
+    private float og_note_speed;
     public float note_height_origin = 22f;
     float note_z_spawn = 12.0f;
     float note_z_despawn = -6.0f;
     float note_prespawn_time;
+    float note_postspawn_time;
     public float time_current = -2.0f;
     public float time_offset = 0.0f;
     float time_nextnote = 5.0f;
+    float time_nextnote_deco = 5.0f;
+    public float global_offset = 0.22f;
 
     // Input state var - 0 (space) 1 2 (left) 3 4 (right)
     //bool[] InputState = new bool[5];
@@ -59,6 +64,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject NotePrefabHold;
     [SerializeField] private GameObject NotePrefabSlide;
     [SerializeField] private GameObject NotePrefabSwap;
+    [SerializeField] private GameObject NotePrefabDeco;
     [SerializeField] private Material NoteMaterialSpace;
     [SerializeField] private GameObject NoteTriggerPrefab;
     [SerializeField] private GameObject NoteTriggerPlayerPrefab;
@@ -91,7 +97,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     // Note Types
-    public enum NoteType { TAP, HOLD, SLIDE, SWAP };
+    public enum NoteType { TAP, HOLD, SLIDE, SWAP, DECO };
 
     public enum GameState { RHYTHM, BULLET };
     public GameState gamestate = GameState.RHYTHM;
@@ -231,6 +237,10 @@ public class GameManager : MonoBehaviour
             case NoteType.SLIDE:
                 NoteToSpawn = NotePrefabSlide;
                 break;
+            case NoteType.DECO:
+                NoteToSpawn = NotePrefabDeco;
+                key = KeyCode.Space;
+                break;
             default:
                 NoteToSpawn = NotePrefabTap;
                 break;
@@ -253,7 +263,7 @@ public class GameManager : MonoBehaviour
             new_note.GetComponent<HoldNote3D>().time_end = time_end;
 
         // Set Color
-        if (key == KeyCode.Space)
+        if (key == KeyCode.Space && type != NoteType.DECO)
         {
             Renderer[] childRenderers = new_note.GetComponentsInChildren<Renderer>();
             foreach (Renderer rend in childRenderers)
@@ -263,13 +273,13 @@ public class GameManager : MonoBehaviour
         }
         
         // Attach moving glow
-        if (travelVFXPrefab != null && !editorMode) 
+        if (travelVFXPrefab != null && !editorMode && type != NoteType.DECO) 
         {
             GameObject trail = Instantiate(travelVFXPrefab, new_note.transform.position, Quaternion.identity, new_note.transform.GetChild(0));
         }
 
         // Editor Mode
-        if (editorMode)
+        if (editorMode && type != NoteType.DECO)
         {
             // Add NoteEditor if missing
             if (new_note.GetComponent<NoteEditor>() == null)
@@ -319,6 +329,9 @@ public class GameManager : MonoBehaviour
         GameObject hit_note = null;
         float closest_note_distance = float.MaxValue;
         foreach (GameObject note in ActiveNotes) {
+
+            // skip decoration notes
+            if (note.GetComponent<Note3D>().IsDecoration()) continue;
 
             float note_distance = note.GetComponent<Note3D>().GetDistance(t, k);
             if (note_distance < closest_note_distance) {
@@ -399,6 +412,8 @@ public class GameManager : MonoBehaviour
     }
 
     void ScoreNote(GameObject note, float accuracy) {
+
+        if (note.GetComponent<Note3D>().IsDecoration()) return;
 
         scoreTypeText.color = Color.white;
 
@@ -502,6 +517,16 @@ public class GameManager : MonoBehaviour
 
     void HandleNoteSpawning()
     {
+        
+        // Random Deco Nodes
+        while (time_current >= (time_nextnote_deco - note_prespawn_time) ) {
+            if (editorMode)
+            {
+                SpawnNote(LaneIDToKey(0), time_nextnote_deco, NoteType.DECO);
+            }
+            time_nextnote_deco += 60.0f/bpm;
+        }
+
         // Spawn Notes
         if (randomSpawnMode) {
 
@@ -602,12 +627,16 @@ public class GameManager : MonoBehaviour
                         break;
                     case Beatmap.NoteInfo.HOLD_NOTE:
                         //Debug.Log("HOLD_NOTE_PLAYED");
-                        Debug.Log("test: " + noteInfos[currNote].extra_info[1]);
+                        //Debug.Log("test: " + noteInfos[currNote].extra_info[1]);
                         SpawnNote(LaneIDToKey(int.Parse(noteInfos[currNote].extra_info[0])), noteInfos[currNote].start_time, NoteType.HOLD, float.Parse(noteInfos[currNote].extra_info[1]), id: currNote);
                         break;
                     case Beatmap.NoteInfo.SPACE_NOTE:
                         //Debug.Log("SPACE_NOTE_PLAYED");
                         SpawnNote(KeyCode.Space, noteInfos[currNote].start_time, NoteType.TAP, id: currNote);
+                        break;
+                    case Beatmap.NoteInfo.SWAP_NOTE:
+                        //Debug.Log("SPACE_NOTE_PLAYED");
+                        SpawnNote(KeyCode.Space, noteInfos[currNote].start_time, NoteType.SWAP, id: currNote);
                         break;
                     case Beatmap.NoteInfo.SLIDE_NOTE:
                         //Debug.Log("SLIDE_NOTE_PLAYED");
@@ -941,6 +970,7 @@ public class GameManager : MonoBehaviour
 
         if (cam.IsEditorState)
         {
+            note_speed = og_note_speed;
             if (gamestate == GameState.RHYTHM)
                 cam.TransitionToRhythmGame();
             else
@@ -948,6 +978,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            og_note_speed = note_speed;
             cam.TransitionToEditor();
         }
 
@@ -956,13 +987,45 @@ public class GameManager : MonoBehaviour
 
     void UpdateEditor()
     {
-        if (paused)
+        if (true)
         {
-            if (Input.GetKeyDown(KeyCode.W))
+            // Number keys 1–5 add new TAP notes at current snapped time
+            if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Alpha5))
+            {
+
+                float snap = 60f / bpm * editorSnapScale;
+                float newTime = Mathf.Round(time_current / snap) * snap;
+
+                if (Input.GetKeyDown(KeyCode.Alpha1))
+                {
+                    noteInfos.Add(new Beatmap.NoteInfo(Beatmap.NoteInfo.BASIC_NOTE, newTime, new string[] { "1" }));
+                }
+                if (Input.GetKeyDown(KeyCode.Alpha2))
+                {
+                    noteInfos.Add(new Beatmap.NoteInfo(Beatmap.NoteInfo.BASIC_NOTE, newTime, new string[] { "2" }));
+                }
+                if (Input.GetKeyDown(KeyCode.Alpha3))
+                {
+                    noteInfos.Add(new Beatmap.NoteInfo(Beatmap.NoteInfo.BASIC_NOTE, newTime, new string[] { "0" }));
+                }
+                if (Input.GetKeyDown(KeyCode.Alpha4))
+                {
+                    noteInfos.Add(new Beatmap.NoteInfo(Beatmap.NoteInfo.BASIC_NOTE, newTime, new string[] { "3" }));
+                }
+                if (Input.GetKeyDown(KeyCode.Alpha5))
+                {
+                    noteInfos.Add(new Beatmap.NoteInfo(Beatmap.NoteInfo.BASIC_NOTE, newTime, new string[] { "4" }));
+                }
+
+                updateBeatmapOrder();
+                ReloadAllNotesOnScreen();
+
+            } 
+            else if (Input.GetKeyDown(KeyCode.W))
             {
                 // Shift Up / Dupe Shift Up
                 if (editorSelectedNotes.Count > 0) {
-                    bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                    bool shift = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
                     var notesToProcess = editorSelectedNotes.OrderByDescending(n => n.note3D.id).ToList();
                     foreach (NoteEditor noteEditor in notesToProcess)
                     {
@@ -972,42 +1035,44 @@ public class GameManager : MonoBehaviour
                         if (id < 0 || id >= noteInfos.Count) continue;
                         Beatmap.NoteInfo beatmapNote = noteInfos[id];
 
-                        float newtime = beatmapNote.start_time + 60.0f / bpm * editorSnapScale;
+                        float snap = 60.0f / bpm * editorSnapScale;
+                        float newtime = Mathf.Round( (beatmapNote.start_time + snap) / snap) * snap;
 
                         if (shift)
                         {
                             Beatmap.NoteInfo newNote = new Beatmap.NoteInfo(beatmapNote.note_type, beatmapNote.start_time, (string[])beatmapNote.extra_info.Clone());
                             noteInfos.Insert(id + 1, newNote);
-                            foreach (NoteEditor ne in editorSelectedNotes)
-                            {
-                                if (ne.note3D.id > id)
-                                    ne.note3D.id += 1;
-                            }
+                            // foreach (NoteEditor ne in editorSelectedNotes)
+                            // {
+                            //     if (ne.note3D.id > id)
+                            //         ne.note3D.id += 1;
+                            // }
                             // set new time
                             beatmapNote.start_time = newtime;
                             // find new pos and move
-                            int oldId = id;
+                            // int oldId = id;
 
-                            noteInfos.RemoveAt(oldId); // Temporarily remove it
-                            int newId = noteInfos.FindIndex(n => n.start_time > beatmapNote.start_time);
-                            if (newId == -1) newId = noteInfos.Count; // Goes at end if no later note
-                            noteInfos.Insert(newId, beatmapNote);
+                            // noteInfos.RemoveAt(oldId); // Temporarily remove it
+                            // int newId = noteInfos.FindIndex(n => n.start_time > beatmapNote.start_time);
+                            // if (newId == -1) newId = noteInfos.Count; // Goes at end if no later note
+                            // noteInfos.Insert(newId, beatmapNote);
                             //update id of all
-                            foreach (NoteEditor ne in editorSelectedNotes)
-                            {
-                                if (ne.note3D.id == oldId)
-                                    ne.note3D.id = newId;
-                                else if (oldId < newId && ne.note3D.id > oldId && ne.note3D.id <= newId)
-                                    ne.note3D.id -= 1; 
-                                else if (oldId > newId && ne.note3D.id >= newId && ne.note3D.id < oldId)
-                                    ne.note3D.id += 1;
-                            }
+                            // foreach (NoteEditor ne in editorSelectedNotes)
+                            // {
+                            //     if (ne.note3D.id == oldId)
+                            //         ne.note3D.id = newId;
+                            //     else if (oldId < newId && ne.note3D.id > oldId && ne.note3D.id <= newId)
+                            //         ne.note3D.id -= 1; 
+                            //     else if (oldId > newId && ne.note3D.id >= newId && ne.note3D.id < oldId)
+                            //         ne.note3D.id += 1;
+                            // }
                         }
                         else
                         {
                             beatmapNote.start_time = newtime;
                         }
                     }
+                    updateBeatmapOrder();
                     ReloadAllNotesOnScreen();
                 }
 
@@ -1016,7 +1081,7 @@ public class GameManager : MonoBehaviour
             {
                 // Shift Down / Dupe Shift Down
                 if (editorSelectedNotes.Count > 0) {
-                    bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                    bool shift = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
                     var notesToProcess = editorSelectedNotes.OrderByDescending(n => n.note3D.id).ToList();
                     foreach (NoteEditor noteEditor in notesToProcess)
                     {
@@ -1026,41 +1091,43 @@ public class GameManager : MonoBehaviour
                         if (id < 0 || id >= noteInfos.Count) continue;
                         Beatmap.NoteInfo beatmapNote = noteInfos[id];
 
-                        float newtime = beatmapNote.start_time - 60.0f / bpm * editorSnapScale;
+                        float snap = 60.0f / bpm * editorSnapScale;
+                        float newtime = Mathf.Round( (beatmapNote.start_time - snap) / snap) * snap;
 
                         if (shift)
                         {
                             Beatmap.NoteInfo newNote = new Beatmap.NoteInfo(beatmapNote.note_type, beatmapNote.start_time, (string[])beatmapNote.extra_info.Clone());
                             noteInfos.Insert(id + 1, newNote);
-                            foreach (NoteEditor ne in editorSelectedNotes)
-                            {
-                                if (ne.note3D.id > id)
-                                    ne.note3D.id += 1;
-                            }
+                            // foreach (NoteEditor ne in editorSelectedNotes)
+                            // {
+                            //     if (ne.note3D.id > id)
+                            //         ne.note3D.id += 1;
+                            // }
                             // set new time
                             beatmapNote.start_time = newtime;
                             // find new pos and move
-                            int oldId = id;
-                            noteInfos.RemoveAt(oldId); // Temporarily remove it
-                            int newId = noteInfos.FindIndex(n => n.start_time > beatmapNote.start_time);
-                            if (newId == -1) newId = noteInfos.Count; // Goes at end if no later note
-                            noteInfos.Insert(newId, beatmapNote);
-                            //update id of all
-                            foreach (NoteEditor ne in editorSelectedNotes)
-                            {
-                                if (ne.note3D.id == oldId)
-                                    ne.note3D.id = newId;
-                                else if (oldId < newId && ne.note3D.id > oldId && ne.note3D.id <= newId)
-                                    ne.note3D.id -= 1; 
-                                else if (oldId > newId && ne.note3D.id >= newId && ne.note3D.id < oldId)
-                                    ne.note3D.id += 1;
-                            }
+                            // int oldId = id;
+                            // noteInfos.RemoveAt(oldId); // Temporarily remove it
+                            // int newId = noteInfos.FindIndex(n => n.start_time > beatmapNote.start_time);
+                            // if (newId == -1) newId = noteInfos.Count; // Goes at end if no later note
+                            // noteInfos.Insert(newId, beatmapNote);
+                            // //update id of all
+                            // foreach (NoteEditor ne in editorSelectedNotes)
+                            // {
+                            //     if (ne.note3D.id == oldId)
+                            //         ne.note3D.id = newId;
+                            //     else if (oldId < newId && ne.note3D.id > oldId && ne.note3D.id <= newId)
+                            //         ne.note3D.id -= 1; 
+                            //     else if (oldId > newId && ne.note3D.id >= newId && ne.note3D.id < oldId)
+                            //         ne.note3D.id += 1;
+                            // }
                         }
                         else
                         {
                             beatmapNote.start_time = newtime;
                         }
                     }
+                    updateBeatmapOrder();
                     ReloadAllNotesOnScreen();
                 }
 
@@ -1069,7 +1136,7 @@ public class GameManager : MonoBehaviour
             {
                 // Shift Left / Dupe Shift Left
                 if (editorSelectedNotes.Count > 0) {
-                    bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                    bool shift = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
                     var notesToProcess = editorSelectedNotes.OrderByDescending(n => n.note3D.id).ToList();
                     foreach (NoteEditor noteEditor in notesToProcess)
                     {
@@ -1108,6 +1175,7 @@ public class GameManager : MonoBehaviour
                             beatmapNote.extra_info[0] = KeyToLaneID(newkey).ToString();
                         }
                     }
+                    updateBeatmapOrder();
                     ReloadAllNotesOnScreen();
                 }
 
@@ -1116,7 +1184,7 @@ public class GameManager : MonoBehaviour
             {
                 // Shift Right / Dupe Shift Right
                 if (editorSelectedNotes.Count > 0) {
-                    bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                    bool shift = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
                     var notesToProcess = editorSelectedNotes.OrderByDescending(n => n.note3D.id).ToList();
                     foreach (NoteEditor noteEditor in notesToProcess)
                     {
@@ -1143,11 +1211,11 @@ public class GameManager : MonoBehaviour
                         {
                             Beatmap.NoteInfo newNote = new Beatmap.NoteInfo(beatmapNote.note_type, beatmapNote.start_time, (string[])beatmapNote.extra_info.Clone());
                             noteInfos.Insert(id + 1, newNote);
-                            foreach (NoteEditor ne in editorSelectedNotes)
-                            {
-                                if (ne.note3D.id > id)
-                                    ne.note3D.id += 1;
-                            }
+                            // foreach (NoteEditor ne in editorSelectedNotes)
+                            // {
+                            //     if (ne.note3D.id > id)
+                            //         ne.note3D.id += 1;
+                            // }
                             beatmapNote.extra_info[0] = KeyToLaneID(newkey).ToString();
                         }
                         else
@@ -1155,6 +1223,7 @@ public class GameManager : MonoBehaviour
                             beatmapNote.extra_info[0] = KeyToLaneID(newkey).ToString();
                         }
                     }
+                    updateBeatmapOrder();
                     ReloadAllNotesOnScreen();
                 }
 
@@ -1244,19 +1313,46 @@ public class GameManager : MonoBehaviour
                 }
 
             }
+            else if (Input.GetKeyDown(KeyCode.Delete))
+            {
+                if (editorSelectedNotes.Count > 0) {
+                    var notesToProcess = editorSelectedNotes.OrderByDescending(n => n.note3D.id).ToList();
+                    foreach (NoteEditor noteEditor in notesToProcess)
+                    {
+                        Note3D note = noteEditor.note3D;
+                        int id = note.id;
+                        NoteType type = note.GetNoteType();
+
+                        if (id < 0 || id >= noteInfos.Count) continue;
+
+                        Beatmap.NoteInfo beatmapNote = noteInfos[id];
+
+                        noteInfos.RemoveAt(id);
+                        editorSelectedNotes.Remove(noteEditor);
+                        foreach (NoteEditor ne in editorSelectedNotes)
+                        {
+                            if (ne.note3D.id > id)
+                                ne.note3D.id -= 1;
+                        }
+                    }
+                    ReloadAllNotesOnScreen();
+                }
+
+            }
         }
 
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0f)
         {
-            bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftShift) ||
+    Input.GetKey(KeyCode.RightShift);
 
             if (ctrl)
             {
                 float speed_mod = Mathf.Sign(scroll) * 0.5f;
-                note_speed = Mathf.Clamp(note_speed + speed_mod, 2f, 20f);
-                updateNoteRespawnTime();
+                note_speed = Mathf.Clamp(note_speed + speed_mod, 1f, 20f);
+                updateNotePrespawnTime();
             }
             else
             {
@@ -1272,7 +1368,8 @@ public class GameManager : MonoBehaviour
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftShift) ||
+    Input.GetKey(KeyCode.RightShift);
 
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
@@ -1377,9 +1474,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void updateNoteRespawnTime()
+    void updateNotePrespawnTime()
     {
         note_prespawn_time = (note_z_spawn - note_z_despawn) / note_speed;
+        note_postspawn_time = -note_z_despawn / note_speed;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -1392,8 +1490,8 @@ public class GameManager : MonoBehaviour
         // Rhythm game setup
         time_offset = 0.42f;
         instance = this;
-        updateNoteRespawnTime();
-        noteInfos = Beatmap.LoadBeatmap("beatmap");
+        updateNotePrespawnTime();
+        noteInfos = Beatmap.LoadBeatmap("Beatmap_Main");
         currNote = 0;
 
         // GUI setup
@@ -1461,7 +1559,44 @@ public class GameManager : MonoBehaviour
 
         ReloadAllNotesOnScreen();
     }
+    public void updateBeatmapOrder()
+    {
+        var indexed = noteInfos.Select((note, i) => new { note, oldIndex = i }).ToList();
 
+        indexed.Sort((a, b) => a.note.start_time.CompareTo(b.note.start_time));
+
+        noteInfos = indexed.Select(x => x.note).ToList();
+
+        int[] oldToNew = new int[indexed.Count];
+        for (int newIndex = 0; newIndex < indexed.Count; newIndex++)
+        {
+            oldToNew[indexed[newIndex].oldIndex] = newIndex;
+        }
+        
+        List<int> selectedIds = new List<int>();
+        if (editorMode) {
+            foreach (NoteEditor note in editorSelectedNotes)
+            {
+                selectedIds.Add(note.note3D.id); 
+            }
+            EditorDeselectAll();
+        }
+
+        // Restore editor selection
+        if (editorMode) {
+            foreach (int id in selectedIds)
+            {
+                int new_id = oldToNew[id];
+                NoteEditor note = ActiveNotes.Find(n => n.GetComponent<NoteEditor>()?.note3D?.id == new_id)?.GetComponent<NoteEditor>();
+                if (note != null)
+                {
+                    editorSelectedNotes.Add(note);    
+                    note.OnSelect();
+                }
+            }
+        }
+
+    }
     public void ReloadAllNotesOnScreen()
     {
         
@@ -1483,16 +1618,15 @@ public class GameManager : MonoBehaviour
         ActiveNotes.Clear();
         // beatmap note
         currNote = 0;
-        while (currNote < noteInfos.Count && time_current >= noteInfos[currNote].start_time)
+        while (currNote < noteInfos.Count && time_current - note_postspawn_time >= noteInfos[currNote].start_time)
         {
             currNote++;
         }
-        // note
-        time_nextnote = 0.0f;
-        while (time_nextnote < time_current)
-        {
-            time_nextnote += 60.0f / bpm;
-        }
+        // on-beat notes
+        float b = 60f / bpm;
+        time_nextnote = Mathf.Ceil((time_current - note_postspawn_time) / b) * b;
+        time_nextnote_deco = time_nextnote;
+        // spawn notes
         HandleNoteSpawning();
 
         // Restore editor selection
@@ -1542,10 +1676,56 @@ public class GameManager : MonoBehaviour
 
         setPause(true);
 
-        // TODO: turn the noteInfos list into a beatmap (Veer help)
+        Debug.Log("Saving Beatmap...");
 
-        // ideally we first make a copy of the current beatmap file (name it with datetime or smth)
-        // and then we output directly to the main file for max convenience
+        void WriteFile(string path)
+        {
+            using (StreamWriter writer = new StreamWriter(path))
+            {
+                writer.WriteLine("Global Offset:");
+                writer.WriteLine(global_offset.ToString("F2"));
+                writer.WriteLine("Note Data:");
+
+                foreach (var note in noteInfos)
+                {
+                    string line = note.note_type.ToString();
+
+                    int minutes = Mathf.FloorToInt(note.start_time / 60f);
+                    float seconds = note.start_time % 60f;
+                    line += $" {minutes}:{seconds:F2}";
+
+                    if (note.extra_info != null && note.extra_info.Length > 0)
+                    {
+                        string[] formattedInfo = new string[note.extra_info.Length];
+                        note.extra_info.CopyTo(formattedInfo, 0);
+
+                        if (note.note_type == Beatmap.NoteInfo.HOLD_NOTE && formattedInfo.Length >= 2)
+                        {
+                            if (float.TryParse(formattedInfo[1], out float val))
+                            {
+                                formattedInfo[1] = $"{Mathf.FloorToInt(val / 60f)}:{(val % 60f):00.00}";
+                            }
+                        }
+                        else if (note.note_type == Beatmap.NoteInfo.SLIDE_NOTE && formattedInfo.Length >= 1)
+                        {
+                            if (float.TryParse(formattedInfo[0], out float val))
+                            {
+                                formattedInfo[0] = $"{Mathf.FloorToInt(val / 60f)}:{(val % 60f):00.00}";
+                            }
+                        }
+                        line += " " + string.Join(" ", formattedInfo);
+                    }
+                    writer.WriteLine(line);
+                }
+            }
+            Debug.Log($"Beatmap exported to: {path}");
+        }
+
+        string path1 = "Assets/Resources/Beatmap_Main.txt";
+        string path2 = Path.Combine("Assets", $"Resources/Beatmap_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+
+        WriteFile(path1);
+        WriteFile(path2);
 
     }
     

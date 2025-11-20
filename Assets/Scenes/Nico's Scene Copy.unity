@@ -1215,10 +1215,12 @@ MonoBehaviour:
   note_height_origin: 22
   time_current: 0
   time_offset: 0
+  global_offset: 0.22
   NotePrefabTap: {fileID: 8451768978859604752, guid: 0dcc6899da3e11140ad525c8929cbb07, type: 3}
   NotePrefabHold: {fileID: 8451768978859604752, guid: 7701a966a0635214f8d5ae732743b3ec, type: 3}
   NotePrefabSlide: {fileID: 221500376483738073, guid: fe6a67bb9c69f6d4d99be9d37223956d, type: 3}
   NotePrefabSwap: {fileID: 8451768978859604752, guid: d65550880d7c13041be31dfcaa3e677f, type: 3}
+  NotePrefabDeco: {fileID: 8451768978859604752, guid: 61c1caade5d055a4d96d0f91b97dd560, type: 3}
   NoteMaterialSpace: {fileID: 2100000, guid: 4270c46495f92d649a807b311f4c15ee, type: 2}
   NoteTriggerPrefab: {fileID: 2093069400746597394, guid: 632cc8892ae9f924a9282f4ac434e35d, type: 3}
   NoteTriggerPlayerPrefab: {fileID: 2093069400746597394, guid: cff25d4318151db468b8797f9f4c8784, type: 3}
