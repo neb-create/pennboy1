@@ -182,7 +182,6 @@ public class GameManager : MonoBehaviour
         if (masterProjectilePool != null)
         {
             masterProjectilePool.Clear();
-            Debug.Log("clear pool");
         }
         boundingBoxes.SetActive(false);
         ClearBulletHell();
@@ -902,6 +901,7 @@ public class GameManager : MonoBehaviour
         } else {
             
             Pair p = emitters[emitterIndex];
+            if(emitterIndex > 0) emitters[emitterIndex].emitter.SetActive(false);
 
             if (p.emitter == null)
             {

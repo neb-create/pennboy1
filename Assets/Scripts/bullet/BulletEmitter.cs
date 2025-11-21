@@ -42,6 +42,8 @@ public class BulletEmitter : MonoBehaviour
     {
         if (type != EmitType.stopFlag)
         {
+            if (roundsEmitted == numRounds) return;
+
             if (manager == null)
             {
                 manager = GameManager.instance;
@@ -55,8 +57,6 @@ public class BulletEmitter : MonoBehaviour
                 Emit();
                 elapsedTime = 0;
             }
-
-            if (roundsEmitted == numRounds) gameObject.SetActive(false);
         }
     }
     void Emit()

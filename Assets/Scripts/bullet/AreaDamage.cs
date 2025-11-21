@@ -17,7 +17,8 @@ public class AreaDamage : MonoBehaviour
     private float damageCooldown = 1f;
     private float lastDamageInstanceTime = -1;
     private bool canDealDamage = false;
-    private float timeBeforeCanDealDamage = 1f;
+    [SerializeField] float beatsBeforeCanDoDamage = 3f; //just assume lifetime beats is true
+    private float timeBeforeCanDealDamage;
     private Collider col;
     private MeshRenderer mr;
 
@@ -30,6 +31,10 @@ public class AreaDamage : MonoBehaviour
 
         col.enabled = false;
         mr.enabled = false;
+
+        timeBeforeCanDealDamage = beatsBeforeCanDoDamage * (60.0f / GameManager.instance.bpm);
+
+        
     }
     // Update is called once per frame
     void FixedUpdate()
@@ -48,7 +53,7 @@ public class AreaDamage : MonoBehaviour
                 mr.enabled = true;
             }
         } else {
-            if (lifetimeBeats == 0) lifetimeBeats = lifetime * (60f / GameManager.instance.bpm);
+            if (lifetimeBeats == 0) lifetimeBeats = lifetime * (60.0f / GameManager.instance.bpm);
         
             float effectiveLifetime = lifetime;
             if (lifetimeInBeats) effectiveLifetime = lifetimeBeats;
