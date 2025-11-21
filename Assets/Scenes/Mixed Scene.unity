@@ -420,6 +420,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 849ca1f12812b634b9d5d3ce4ec4627b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  key: 0
+  targetObject: {fileID: 0}
+  time: 0
+  triggered: 0
+  id: 0
   startTime: 1
   endTime: 10
   maxDist: 2
@@ -834,6 +839,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rhythmGamePreset: {fileID: 872108570}
   bulletHellPreset: {fileID: 2030916864}
+  editorPreset: {fileID: 0}
   transitionDuration: 0.75
   transitionCurve:
     serializedVersion: 2
@@ -859,6 +865,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  editorOrthoSize: 7
+  gameplayFOV: 60
 --- !u!1 &123382297
 GameObject:
   m_ObjectHideFlags: 0
@@ -1168,25 +1176,35 @@ MonoBehaviour:
   note_height_origin: 22
   time_current: 0
   time_offset: 0
+  global_offset: 0.22
   NotePrefabTap: {fileID: 8451768978859604752, guid: 0dcc6899da3e11140ad525c8929cbb07, type: 3}
   NotePrefabHold: {fileID: 8451768978859604752, guid: 7701a966a0635214f8d5ae732743b3ec, type: 3}
   NotePrefabSlide: {fileID: 221500376483738073, guid: fe6a67bb9c69f6d4d99be9d37223956d, type: 3}
   NotePrefabSwap: {fileID: 8451768978859604752, guid: d65550880d7c13041be31dfcaa3e677f, type: 3}
+  NotePrefabDeco: {fileID: 0}
   NoteMaterialSpace: {fileID: 2100000, guid: 4270c46495f92d649a807b311f4c15ee, type: 2}
   NoteTriggerPrefab: {fileID: 2093069400746597394, guid: 632cc8892ae9f924a9282f4ac434e35d, type: 3}
   NoteTriggerPlayerPrefab: {fileID: 2093069400746597394, guid: cff25d4318151db468b8797f9f4c8784, type: 3}
   hitVFXPrefab: {fileID: 7828873900810526531, guid: ee5803bb421304cc3b293ab237e15c04, type: 3}
   travelVFXPrefab: {fileID: 3637245434513059628, guid: 8559467e6d88b4562b4f17cce95b54fd, type: 3}
   slideVFXPrefab: {fileID: 3637245434513059628, guid: 554db2d52233e446f833fb7e69b8990f, type: 3}
+  allowEditor: 0
+  showTimeline: 0
+  editorSelectedNotes: []
   timeline: {fileID: 1170561770}
   playPauseLabel: {fileID: 360281188}
+  editorPauseLabel: {fileID: 0}
+  playPauseButton: {fileID: 0}
+  editorSnapButtonLabel: {fileID: 0}
+  editorSnapScale: 0.25
   audioSource: {fileID: 257448156}
   editorContainer: {fileID: 396214737}
+  timelineContainer: {fileID: 0}
   player: {fileID: 2005414062}
   gameCamera: {fileID: 112312444}
   gamestate: 0
-  randomSpawnMode: 0
-  spawnSwapNotes: 0
+  randomSpawnMode: 1
+  spawnSwapNotes: 1
   finishedSong: 0
   scoreText: {fileID: 46792812}
   comboText: {fileID: 1537796274}

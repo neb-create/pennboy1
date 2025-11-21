@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float dashCooldown = 0.5f;
     private float timeWhenDashStart;
     private bool isDashing = false;
+    private Rect bounds;
     public bool IsDashing()
     {
         return isDashing;
@@ -28,6 +29,11 @@ public class PlayerController : MonoBehaviour
     {
         // Don't do anything if in rhythm game state
         if (GameManager.instance.gamestate == GameManager.GameState.RHYTHM) return;
+
+        if(bounds == null)
+        {
+            bounds = calcBulletHellBounds(); //hopefully only need to calc once
+        }
 
         // Else
         dir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
@@ -66,5 +72,44 @@ public class PlayerController : MonoBehaviour
         isDashing = true;
         timeWhenDashStart = Time.time;
         rb.linearVelocity = dir * dashSpeed; //TODO: it should drop off a little instead of just reverting to 5
+    }
+    Rect calcBulletHellBounds()
+    {
+        Camera cam = Camera.main;
+
+        Ray bottomLeft = cam.ViewportPointToRay(new Vector3(0, 0, 0));
+        float t = -bottomLeft.origin.z/bottomLeft.direction.z;
+        Vector3 point = bottomLeft.origin + bottomLeft.direction*t;
+
+        float xMin = point.x;
+        float xMax = point.x;
+        float yMin = point.y;
+        float yMax = point.y;
+
+        Ray topLeft = cam.ViewportPointToRay(new Vector3(0, 1, 0));
+        t = -topLeft.origin.z/topLeft.direction.z;
+        point = topLeft.origin + topLeft.direction*t;
+        xMin = Mathf.Min(xMin, point.x);
+        xMax = Mathf.Max(xMax, point.x);
+        yMin = Mathf.Min(yMin, point.y);
+        yMax = Mathf.Max(yMax, point.y);
+
+        Ray topRight = cam.ViewportPointToRay(new Vector3(1, 1, 0));
+        t = -topRight.origin.z/topRight.direction.z;
+        point = topRight.origin + topRight.direction*t;
+        xMin = Mathf.Min(xMin, point.x);
+        xMax = Mathf.Max(xMax, point.x);
+        yMin = Mathf.Min(yMin, point.y);
+        yMax = Mathf.Max(yMax, point.y);
+
+        Ray bottomRight = cam.ViewportPointToRay(new Vector3(1, 0, 0));
+        t = -bottomRight.origin.z/bottomRight.direction.z;
+        point = bottomRight.origin + bottomRight.direction*t;
+        xMin = Mathf.Min(xMin, point.x);
+        xMax = Mathf.Max(xMax, point.x);
+        yMin = Mathf.Min(yMin, point.y);
+        yMax = Mathf.Max(yMax, point.y);
+
+        return Rect.MinMaxRect(xMin, yMin, xMax, yMax);
     }
 }

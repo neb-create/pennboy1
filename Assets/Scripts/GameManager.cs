@@ -144,6 +144,7 @@ public class GameManager : MonoBehaviour
     private float timePerBeat = 0.5f;
     private float timeLastEmitterSetActive;
     private float bulletHellStartTime;
+    [SerializeField] GameObject boundingBoxes;
 
 
     void swapGameState()
@@ -183,6 +184,7 @@ public class GameManager : MonoBehaviour
             masterProjectilePool.Clear();
             Debug.Log("clear pool");
         }
+        boundingBoxes.SetActive(false);
         ClearBulletHell();
         
         // Swap: 
@@ -865,6 +867,8 @@ public class GameManager : MonoBehaviour
 
         // Todo... bullet hell setup..
         gameCamera.GetComponent<GameCamera>().TransitionToBulletHell();
+
+        boundingBoxes.SetActive(true);
 
         masterProjectilePool = new ObjectPool<GameObject>(
             CreatePooledBullet,
