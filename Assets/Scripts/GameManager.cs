@@ -1491,6 +1491,26 @@ public class GameManager : MonoBehaviour
         timeLastEmitterSetActive = Time.time;
         emitterIndex = 0;
 
+        instance = this;
+
+        // Check if the GlobalSettings object exists
+        if (GlobalSettings.Instance != null)
+        {
+            Debug.Log("Loading Global Settings...");
+            note_speed = GlobalSettings.Instance.scrollSpeed;
+            time_offset = GlobalSettings.Instance.audioOffset;
+        }
+        else
+        {
+            // Fallback defaults if starting scene directly without Menu
+            Debug.LogWarning("GlobalSettings not found, using local defaults.");
+            // Only set these if you didn't set them in the Inspector
+            if (time_offset == 0) time_offset = 0.42f;
+        }
+
+        // CRITICAL: Update og_note_speed so the Editor mode toggle logic works correctly
+        og_note_speed = note_speed;
+
         // Rhythm game setup
         time_offset = 0.42f;
         instance = this;

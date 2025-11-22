@@ -15,6 +15,11 @@ public class TitleScreen : MonoBehaviour {
 
     public void SelectSongButton()
     {
-        SceneManager.LoadScene("Mixed Scene");
+        SceneManager.LoadScene("Nico's Scene Copy");
+    }
+
+    public void GachaButton()
+    {
+        SceneManager.LoadScene("Gacha");
     }
 }
