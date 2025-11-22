@@ -49,7 +49,7 @@ public class GameManager : MonoBehaviour
     public float time_offset = 0.0f;
     float time_nextnote = 5.0f;
     float time_nextnote_deco = 5.0f;
-    public float global_offset = 0.22f;
+    public float global_offset = 0.0f;
 
     // Input state var - 0 (space) 1 2 (left) 3 4 (right)
     //bool[] InputState = new bool[5];

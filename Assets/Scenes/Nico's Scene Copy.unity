@@ -1583,7 +1583,7 @@ MonoBehaviour:
   note_height_origin: 22
   time_current: 0
   time_offset: 0
-  global_offset: 0.22
+  global_offset: 0
   NotePrefabTap: {fileID: 8451768978859604752, guid: 0dcc6899da3e11140ad525c8929cbb07, type: 3}
   NotePrefabHold: {fileID: 8451768978859604752, guid: 7701a966a0635214f8d5ae732743b3ec, type: 3}
   NotePrefabSlide: {fileID: 221500376483738073, guid: fe6a67bb9c69f6d4d99be9d37223956d, type: 3}
@@ -1610,8 +1610,8 @@ MonoBehaviour:
   player: {fileID: 2005414062}
   gameCamera: {fileID: 112312444}
   gamestate: 0
-  randomSpawnMode: 1
-  spawnSwapNotes: 1
+  randomSpawnMode: 0
+  spawnSwapNotes: 0
   finishedSong: 0
   scoreText: {fileID: 46792812}
   comboText: {fileID: 1537796274}
@@ -6560,7 +6560,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 834, y: -23.000061}
+  m_AnchoredPosition: {x: 834, y: -23}
   m_SizeDelta: {x: -1720, y: -1030}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1551602150
@@ -6832,7 +6832,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -35.000183, y: -502.99994}
+  m_AnchoredPosition: {x: -35.000244, y: -503}
   m_SizeDelta: {x: -1720, y: -1030}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &1572960834

@@ -41,7 +41,8 @@ public class Beatmap
             //Debug.Log(line);
             string[] tokens = line.Split(" ");
             int minuteIndex = tokens[1].IndexOf(":");
-            float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60 + global_offset;
+            float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60;
+            // float time = int.Parse(tokens[1].Substring(0, minuteIndex)) * 60 + global_offset;
             time += float.Parse(tokens[1].Substring(minuteIndex + 1));
 
 

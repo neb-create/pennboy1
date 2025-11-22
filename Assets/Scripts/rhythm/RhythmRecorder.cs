@@ -22,13 +22,13 @@ public class RhythmRecorder : MonoBehaviour
     const float MAX_BASIC_DELTA = 0.3f;
     const float RECORD_PERCENT = 1.0f;
 
-    public float global_offset = -1.5f;
+    //public float global_offset = -1.5f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         startTimes = new float[5];
-        data = "Global Offset:\n" + global_offset + "\nNote Data:\n";
+        //data = "Global Offset:\n" + global_offset + "\nNote Data:\n";
         Write();
         GetComponent<AudioSource>().Stop();
     }
