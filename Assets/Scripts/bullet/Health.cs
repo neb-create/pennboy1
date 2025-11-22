@@ -24,7 +24,7 @@ public class Health : MonoBehaviour
 
     void OnHealthReachZero()
     {
-        PlayDeathVFX();
+        //PlayDeathVFX();
     }
     void PlayDeathVFX()
     {
