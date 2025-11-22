@@ -475,7 +475,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 135
   totalArcAngle: 0
-  speed: 5
+  speed: 10
 --- !u!114 &50571831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -489,7 +489,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
-  preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
+  preset: {fileID: 11400000, guid: 5daa4588cda9b4017a40575915138521, type: 2}
   numToEmitPerRound: 1
   numRounds: 2
   timeBetweenRounds: 3
@@ -862,7 +862,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 0
   totalArcAngle: 90
-  speed: 3
+  speed: 4
 --- !u!114 &121206599
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -970,7 +970,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 0
   totalArcAngle: 360
-  speed: 4
+  speed: 5
 --- !u!114 &123382299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1552,6 +1552,7 @@ GameObject:
   - component: {fileID: 257448155}
   - component: {fileID: 257448154}
   - component: {fileID: 257448156}
+  - component: {fileID: 257448157}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -1579,7 +1580,7 @@ MonoBehaviour:
   bad_count: 0
   miss_count: 0
   bpm: 174
-  note_speed: 9
+  note_speed: 15
   note_height_origin: 22
   time_current: 0
   time_offset: 0
@@ -1630,58 +1631,59 @@ MonoBehaviour:
   bulletPrefab: {fileID: 1650497433553459816, guid: 147a9e42a20f74fbbb83fb3630994462, type: 3}
   emitters:
   - emitter: {fileID: 412561547}
-    activateTimestamp: 0:4.18
+    activateTimestamp: 1:27.24
   - emitter: {fileID: 1068750665}
-    activateTimestamp: 0:4.18
+    activateTimestamp: 1:27.24
   - emitter: {fileID: 1849241050}
-    activateTimestamp: 0:4.35
+    activateTimestamp: 1:28.62
   - emitter: {fileID: 1822888176}
-    activateTimestamp: 0:4.53
+    activateTimestamp: 1:29.31
   - emitter: {fileID: 123382297}
-    activateTimestamp: 0:6.25
+    activateTimestamp: 1:32.76
   - emitter: {fileID: 3646917666201783557}
-    activateTimestamp: 
+    activateTimestamp: 1:37.93
   - emitter: {fileID: 1686701391}
-    activateTimestamp: 
+    activateTimestamp: 1:42.76
   - emitter: {fileID: 50571828}
-    activateTimestamp: 
+    activateTimestamp: 1:43.10
   - emitter: {fileID: 523047217}
-    activateTimestamp: 
+    activateTimestamp: 1:43.62
   - emitter: {fileID: 857700401}
-    activateTimestamp: 
+    activateTimestamp: 1:44.31
   - emitter: {fileID: 1497844426}
-    activateTimestamp: 
-  - emitter: {fileID: 1111555977}
-    activateTimestamp: 
+    activateTimestamp: 1:45.00
   - emitter: {fileID: 1404676891}
-    activateTimestamp: 
+    activateTimestamp: 1:47.24
   - emitter: {fileID: 121206596}
-    activateTimestamp: 
+    activateTimestamp: 1:47.59
   - emitter: {fileID: 1015119876}
-    activateTimestamp: 
+    activateTimestamp: 1:47.93
   - emitter: {fileID: 820084904}
-    activateTimestamp: 
+    activateTimestamp: 1:48.28
   - emitter: {fileID: 1532040756}
-    activateTimestamp: 
+    activateTimestamp: 1:50.34
   - emitter: {fileID: 482338131}
-    activateTimestamp: 
+    activateTimestamp: 1:51.03
   - emitter: {fileID: 899054512}
-    activateTimestamp: 
+    activateTimestamp: 1:54.83
   - emitter: {fileID: 500363798}
-    activateTimestamp: 
+    activateTimestamp: 1:59.66
   - emitter: {fileID: 1729767037}
-    activateTimestamp: 
+    activateTimestamp: 2:4.48
   - emitter: {fileID: 1629683766}
-    activateTimestamp: 
+    activateTimestamp: 2:9.31
   - emitter: {fileID: 1440531173}
-    activateTimestamp: 
+    activateTimestamp: 2:9.31
   - emitter: {fileID: 1058330558}
-    activateTimestamp: 
+    activateTimestamp: 2:9.31
   - emitter: {fileID: 351928067}
-    activateTimestamp: 
+    activateTimestamp: 2:9.31
+  - emitter: {fileID: 1111555977}
+    activateTimestamp: 2:11.03
   - emitter: {fileID: 1922462800}
     activateTimestamp: 
   boundingBoxes: {fileID: 652161821}
+  hitSound: {fileID: 257448157}
 --- !u!4 &257448155
 Transform:
   m_ObjectHideFlags: 0
@@ -1706,7 +1708,6 @@ Transform:
   - {fileID: 523047218}
   - {fileID: 857700402}
   - {fileID: 1497844427}
-  - {fileID: 1111555978}
   - {fileID: 1404676892}
   - {fileID: 121206597}
   - {fileID: 1015119877}
@@ -1720,6 +1721,7 @@ Transform:
   - {fileID: 1440531174}
   - {fileID: 1058330559}
   - {fileID: 351928068}
+  - {fileID: 1111555978}
   - {fileID: 1922462801}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 9, y: 0, z: 0}
@@ -1737,6 +1739,103 @@ AudioSource:
   m_Resource: {fileID: 8300000, guid: 8052134ff2ed2514a8feb170a09e97aa, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.4
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!82 &257448157
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 257448153}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 7e5561c3af4091146b5d289651674cbe, type: 3}
+  m_PlayOnAwake: 1
+  m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -2660,7 +2759,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 0
   totalArcAngle: 0
-  speed: 4
+  speed: 5
 --- !u!114 &412561550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2940,7 +3039,7 @@ MonoBehaviour:
   type: 0
   preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
   numToEmitPerRound: 5
-  numRounds: 8
+  numRounds: 6
   timeBetweenRounds: 3
   emitPerBeat: 1
   beatsBetweenRounds: 3
@@ -3012,7 +3111,7 @@ GameObject:
   - component: {fileID: 500363801}
   - component: {fileID: 500363800}
   m_Layer: 0
-  m_Name: bullet-emitter-proj-4x4-radial
+  m_Name: bullet-emitter-proj-4x5-radial
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3047,7 +3146,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 0
   totalArcAngle: 360
-  speed: 5
+  speed: 7
 --- !u!114 &500363801
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3063,10 +3162,10 @@ MonoBehaviour:
   type: 1
   preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
   numToEmitPerRound: 4
-  numRounds: 4
+  numRounds: 5
   timeBetweenRounds: 3
   emitPerBeat: 1
-  beatsBetweenRounds: 3
+  beatsBetweenRounds: 2
 --- !u!212 &500363802
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3306,7 +3405,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 45
   totalArcAngle: 0
-  speed: 5
+  speed: 10
 --- !u!114 &523047220
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3320,7 +3419,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
-  preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
+  preset: {fileID: 11400000, guid: 5daa4588cda9b4017a40575915138521, type: 2}
   numToEmitPerRound: 1
   numRounds: 2
   timeBetweenRounds: 3
@@ -4147,7 +4246,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 180
   totalArcAngle: 90
-  speed: 3
+  speed: 4
 --- !u!114 &820084907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4270,7 +4369,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 315
   totalArcAngle: 0
-  speed: 5
+  speed: 10
 --- !u!114 &857700404
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4284,7 +4383,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
-  preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
+  preset: {fileID: 11400000, guid: 5daa4588cda9b4017a40575915138521, type: 2}
   numToEmitPerRound: 1
   numRounds: 2
   timeBetweenRounds: 3
@@ -4452,7 +4551,7 @@ MonoBehaviour:
   numRounds: 5
   timeBetweenRounds: 3
   emitPerBeat: 1
-  beatsBetweenRounds: 3
+  beatsBetweenRounds: 2
 --- !u!212 &899054516
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -4837,7 +4936,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 270
   totalArcAngle: 90
-  speed: 3
+  speed: 4
 --- !u!114 &1015119879
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5083,7 +5182,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 180
   totalArcAngle: 0
-  speed: 4
+  speed: 5
 --- !u!114 &1068750668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5692,7 +5791,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 90
   totalArcAngle: 90
-  speed: 3
+  speed: 4
 --- !u!114 &1404676894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6089,7 +6188,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 225
   totalArcAngle: 0
-  speed: 5
+  speed: 10
 --- !u!114 &1497844429
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6103,7 +6202,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
-  preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
+  preset: {fileID: 11400000, guid: 5daa4588cda9b4017a40575915138521, type: 2}
   numToEmitPerRound: 1
   numRounds: 2
   timeBetweenRounds: 3
@@ -6232,7 +6331,7 @@ MonoBehaviour:
   type: 0
   preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
   numToEmitPerRound: 5
-  numRounds: 8
+  numRounds: 6
   timeBetweenRounds: 3
   emitPerBeat: 1
   beatsBetweenRounds: 3
@@ -7681,7 +7780,7 @@ GameObject:
   - component: {fileID: 1729767040}
   - component: {fileID: 1729767039}
   m_Layer: 0
-  m_Name: bullet-emitter-proj-3x3-radial (1)
+  m_Name: bullet-emitter-proj-3x5-radial (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7716,7 +7815,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 0
   totalArcAngle: 360
-  speed: 5
+  speed: 8
 --- !u!114 &1729767040
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7732,10 +7831,10 @@ MonoBehaviour:
   type: 1
   preset: {fileID: 11400000, guid: 159ac7d9a3df443029b476e94a88a4d1, type: 2}
   numToEmitPerRound: 3
-  numRounds: 3
+  numRounds: 5
   timeBetweenRounds: 3
   emitPerBeat: 1
-  beatsBetweenRounds: 3
+  beatsBetweenRounds: 2
 --- !u!212 &1729767041
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -10272,7 +10371,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startAngle: 0
   totalArcAngle: 360
-  speed: 5
+  speed: 6
 --- !u!1 &3646917666201783557
 GameObject:
   m_ObjectHideFlags: 0

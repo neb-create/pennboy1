@@ -146,6 +146,9 @@ public class GameManager : MonoBehaviour
     private float bulletHellStartTime;
     [SerializeField] GameObject boundingBoxes;
 
+    [Header("Audio Sources")]
+    [SerializeField] private AudioSource hitSound;
+
 
     void swapGameState()
     {
@@ -367,7 +370,7 @@ public class GameManager : MonoBehaviour
         
         // Find the closest note in lane
         (GameObject hit_note, float hit_note_distance) = GetClosestNote(time_current, keyId);
-
+        hitSound.Play();
         // check if the hit_note is valid
         if (hit_note != null)
         {
@@ -679,7 +682,7 @@ public class GameManager : MonoBehaviour
             currNote++;
         }
 
-        if (time_current > GetComponent<AudioSource>().clip.length )
+        if (time_current > audioSource.clip.length )
         {
             Debug.Log("Finished Song");
             currNote++;
