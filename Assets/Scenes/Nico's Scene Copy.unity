@@ -1630,9 +1630,9 @@ MonoBehaviour:
   bulletPrefab: {fileID: 1650497433553459816, guid: 147a9e42a20f74fbbb83fb3630994462, type: 3}
   emitters:
   - emitter: {fileID: 412561547}
-    beatsAfterPrevToActivate: 5
     activateTimestamp: 0:4.18
   - emitter: {fileID: 1068750665}
+    activateTimestamp: 0:4.18
   - emitter: {fileID: 1849241050}
     activateTimestamp: 0:4.35
   - emitter: {fileID: 1822888176}
