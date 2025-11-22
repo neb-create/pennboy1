@@ -4,5 +4,5 @@ using UnityEngine;
 public class Pair
 {
     public GameObject emitter;
-    public int beatsAfterPrevToActivate;
+    public string activateTimestamp = "5:00.00";
 }

@@ -1631,56 +1631,56 @@ MonoBehaviour:
   emitters:
   - emitter: {fileID: 412561547}
     beatsAfterPrevToActivate: 5
+    activateTimestamp: 0:4.18
   - emitter: {fileID: 1068750665}
-    beatsAfterPrevToActivate: 0
   - emitter: {fileID: 1849241050}
-    beatsAfterPrevToActivate: 5
+    activateTimestamp: 0:4.35
   - emitter: {fileID: 1822888176}
-    beatsAfterPrevToActivate: 5
+    activateTimestamp: 0:4.53
   - emitter: {fileID: 123382297}
-    beatsAfterPrevToActivate: 12
+    activateTimestamp: 0:6.25
   - emitter: {fileID: 3646917666201783557}
-    beatsAfterPrevToActivate: 8
+    activateTimestamp: 
   - emitter: {fileID: 1686701391}
-    beatsAfterPrevToActivate: 8
+    activateTimestamp: 
   - emitter: {fileID: 50571828}
-    beatsAfterPrevToActivate: 4
+    activateTimestamp: 
   - emitter: {fileID: 523047217}
-    beatsAfterPrevToActivate: 0
+    activateTimestamp: 
   - emitter: {fileID: 857700401}
-    beatsAfterPrevToActivate: 0
+    activateTimestamp: 
   - emitter: {fileID: 1497844426}
-    beatsAfterPrevToActivate: 0
+    activateTimestamp: 
   - emitter: {fileID: 1111555977}
-    beatsAfterPrevToActivate: 12
+    activateTimestamp: 
   - emitter: {fileID: 1404676891}
-    beatsAfterPrevToActivate: 5
+    activateTimestamp: 
   - emitter: {fileID: 121206596}
-    beatsAfterPrevToActivate: 1
+    activateTimestamp: 
   - emitter: {fileID: 1015119876}
-    beatsAfterPrevToActivate: 1
+    activateTimestamp: 
   - emitter: {fileID: 820084904}
-    beatsAfterPrevToActivate: 1
+    activateTimestamp: 
   - emitter: {fileID: 1532040756}
-    beatsAfterPrevToActivate: 4
+    activateTimestamp: 
   - emitter: {fileID: 482338131}
-    beatsAfterPrevToActivate: 3
+    activateTimestamp: 
   - emitter: {fileID: 899054512}
-    beatsAfterPrevToActivate: 24
+    activateTimestamp: 
   - emitter: {fileID: 500363798}
-    beatsAfterPrevToActivate: 8
+    activateTimestamp: 
   - emitter: {fileID: 1729767037}
-    beatsAfterPrevToActivate: 6
+    activateTimestamp: 
   - emitter: {fileID: 1629683766}
-    beatsAfterPrevToActivate: 8
+    activateTimestamp: 
   - emitter: {fileID: 1440531173}
-    beatsAfterPrevToActivate: 2
+    activateTimestamp: 
   - emitter: {fileID: 1058330558}
-    beatsAfterPrevToActivate: 2
+    activateTimestamp: 
   - emitter: {fileID: 351928067}
-    beatsAfterPrevToActivate: 2
+    activateTimestamp: 
   - emitter: {fileID: 1922462800}
-    beatsAfterPrevToActivate: 8
+    activateTimestamp: 
   boundingBoxes: {fileID: 652161821}
 --- !u!4 &257448155
 Transform:

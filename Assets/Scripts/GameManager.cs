@@ -902,33 +902,44 @@ public class GameManager : MonoBehaviour
             OnBulletHellComplete();
 
         } else {
-            
-            Pair p = emitters[emitterIndex];
-            if(emitterIndex > 0) emitters[emitterIndex].emitter.SetActive(false);
 
-            if (p.emitter == null)
+            for(; emitterIndex < emitters.Count(); emitterIndex++)
             {
-                p.emitter = Instantiate(PlaceholderDefaultEmitter);
-                p.emitter.SetActive(false);
-                timeLastEmitterSetActive = Time.time;
-                Debug.Log("created default emitter");
-            }
+                Pair p = emitters[emitterIndex];
+                //we do not set past emitters to false anymore they just sit there
+                //TODO for cleanliness we can possibly set all emitters to false when we reach a stopflag
 
-            if (Time.time >= Math.Max(timeLastEmitterSetActive, bulletHellStartTime) + p.beatsAfterPrevToActivate * timePerBeat)
-            {
-                p.emitter.SetActive(true);
-                Debug.Log("set active: " + emitterIndex);
-                emitterIndex++;
-                timeLastEmitterSetActive = Time.time;
-                if(p.emitter.GetComponent<BulletEmitter>().GetEmitType() == BulletEmitter.EmitType.stopFlag)
+                string timestamp = p.activateTimestamp;
+                int minuteIndex = timestamp.IndexOf(":");
+                if(minuteIndex == -1)
                 {
-                    OnBulletHellComplete();
-                    Debug.Log("reached stop flag");
-                }else if (emitterIndex == emitters.Count)
-                {
-                    OnBulletHellComplete();
-                    Debug.Log("reahced the end w/o reaching a stop flag emitter which should NOT happen");
+                    Debug.Log("timestamp string not set!");
+                    break;
                 }
+                float activateTime = int.Parse(timestamp.Substring(0, minuteIndex)) * 60 + global_offset;
+                activateTime += float.Parse(timestamp.Substring(minuteIndex + 1));
+
+                if(time_current >= activateTime) //it's time to activate this emitter
+                {
+                    p.emitter.SetActive(true);
+                    Debug.Log("set active: " + emitterIndex);
+                    timeLastEmitterSetActive = time_current;
+                    if(p.emitter.GetComponent<BulletEmitter>().GetEmitType() == BulletEmitter.EmitType.stopFlag)
+                    {
+                        OnBulletHellComplete();
+                        Debug.Log("reached stop flag");
+                        break;
+                    }
+                }
+                else
+                {
+                    break; //end loop, emitterindex is now at the index of the next emitter to set active
+                }
+            }
+            if (emitterIndex == emitters.Count)
+            {
+                OnBulletHellComplete();
+                Debug.Log("reahced the end w/o reaching a stop flag emitter which should NOT happen");
             }
         }
 
