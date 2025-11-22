@@ -36,7 +36,7 @@ public class Health : MonoBehaviour
     {
         Debug.Log("took " + dmg + " damage");
         health -= dmg;
-        PlayDamageVFX();
+        //PlayDamageVFX();
 
         if (health <= 0) DieEvent.Invoke();
     }
