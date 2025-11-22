@@ -15,3 +15,5 @@ MonoBehaviour:
   characterName: "(\u2044 \u2044>\u2044 \u25BD \u2044<\u2044 \u2044)"
   characterImage: {fileID: -4234903660092006506, guid: c051b22bb45ec4213b6f2d0ae8b5ec2b, type: 3}
   rarity: 2
+  owned: 0
+  typeNumber: 3

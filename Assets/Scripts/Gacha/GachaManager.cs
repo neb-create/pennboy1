@@ -54,6 +54,7 @@ public class GachaManager : MonoBehaviour
         if (count == 1)
         {
             CharacterDataSO selected = GetRandomCharacter();
+            selected.owned = true;
             StartCoroutine(DelayShow(selected, 1.2f));
             Debug.Log($"Character: {selected.characterName}({selected.rarity})");
         }
@@ -63,6 +64,7 @@ public class GachaManager : MonoBehaviour
             for (int i = 0; i < 10; i++)
             {
                 CharacterDataSO selected = GetRandomCharacter();
+                selected.owned = true;
                 pulledCharacters.Add(selected);
                 Debug.Log($"[{i}] {selected.characterName} ({selected.rarity})");
             }

@@ -15,3 +15,5 @@ MonoBehaviour:
   characterName: TT
   characterImage: {fileID: -4234903660092006506, guid: c051b22bb45ec4213b6f2d0ae8b5ec2b, type: 3}
   rarity: 0
+  owned: 0
+  typeNumber: 2

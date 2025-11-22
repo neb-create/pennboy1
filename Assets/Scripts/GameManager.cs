@@ -162,7 +162,10 @@ public class GameManager : MonoBehaviour
         keyToObjMap.Clear();
         for (int i = player.transform.childCount - 1; i >= 0; i--)
         {
-            DestroyImmediate(player.transform.GetChild(i).gameObject);
+            GameObject child = player.transform.GetChild(i).gameObject;
+            if(child.GetComponent<TextMeshPro>() != null) continue; //don't destroy the expression obj
+
+            DestroyImmediate(child);
         }
         for (int i = ActiveNotes.Count - 1; i >= 0; i--)
         {

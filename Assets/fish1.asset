@@ -15,3 +15,5 @@ MonoBehaviour:
   characterName: 
   characterImage: {fileID: 0}
   rarity: 0
+  owned: 0
+  typeNumber: 0

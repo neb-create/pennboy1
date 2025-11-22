@@ -1,7 +1,11 @@
+using TMPro;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("is one indexed not zero")]
+    [SerializeField] CharacterDataSO[] fishTypes;
+    [SerializeField] TextMeshPro expression;
     private Rigidbody rb;
     private Vector2 dir;
     [SerializeField] float speed = 10f;
@@ -22,6 +26,12 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         timeWhenDashStart = Time.time - 1f;
+
+        if(PlayerPrefs.GetInt("Fish Type") != 0)
+        {
+            Debug.Log("changing");
+            expression.text = fishTypes[PlayerPrefs.GetInt("Fish Type")].characterName;
+        }
     }
 
     // Update is called once per frame
