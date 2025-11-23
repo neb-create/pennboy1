@@ -486,6 +486,7 @@ public class GameManager : MonoBehaviour
 
         // if is swap note: trigger swap
         if (note.GetComponent<Note3D>() is SwapNote3D) {
+            Debug.Log("got to swap note");
             ScoreSwapNote(note);
         }
         
@@ -917,6 +918,7 @@ public class GameManager : MonoBehaviour
                 if(minuteIndex == -1)
                 {
                     Debug.Log("timestamp string not set!");
+                    emitterIndex++; //move to next
                     break;
                 }
                 float activateTime = int.Parse(timestamp.Substring(0, minuteIndex)) * 60 + global_offset;
@@ -924,12 +926,14 @@ public class GameManager : MonoBehaviour
 
                 if(time_current >= activateTime) //it's time to activate this emitter
                 {
+                    Debug.Log(time_current + " " + activateTime);
                     p.emitter.SetActive(true);
                     Debug.Log("set active: " + emitterIndex);
                     timeLastEmitterSetActive = time_current;
                     if(p.emitter.GetComponent<BulletEmitter>().GetEmitType() == BulletEmitter.EmitType.stopFlag)
                     {
                         OnBulletHellComplete();
+                        emitterIndex++; //move past the stop flag
                         Debug.Log("reached stop flag");
                         break;
                     }

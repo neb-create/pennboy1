@@ -1,8 +1,4 @@
-using Unity.VisualScripting;
-using UnityEditor.Presets;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using UnityEngine.Scripting.APIUpdating;
 
 public class Projectile : MonoBehaviour
 {
